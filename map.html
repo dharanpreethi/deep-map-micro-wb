@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>India Water Map | Deep Mapping</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/papaparse@5.3.2/papaparse.min.js"></script>
+    <script src="data.js"></script>
+</head>
+<body>
+    <div id="map"></div>
+
+    <div class="wb-container" id="wbToggleContainer">
+        <img src="wb.png" id="wbIcon" alt="List">
+        <span class="tooltip">water body list</span>
+    </div>
+    <div class="lex-container" onclick="window.open('lexicon.html', '_blank')">
+        <img src="lexicon.png" id="lexIcon" alt="Lexicon">
+        <span class="tooltip">click to view lexicon</span>
+    </div>
+    <div id="waterPanel">
+        <div class="panelHeader">
+            <strong>Water Bodies</strong>
+            <span class="closeBtn" onclick="togglePanel()">✖</span>
+        </div>
+        <div id="waterList"></div>
+    </div>
+
+    <div class="controls">
+        <div class="controlItem" onclick="window.location.href='index.html'">
+            <img src="home.png" alt="Home">
+            <span class="tooltip">home</span>
+        </div>
+        <div class="controlItem" onclick="window.location.href='map.html'">
+            <img src="compass.png" alt="Main Map">
+            <span class="tooltip">main map</span>
+        </div>
+        <div class="controlItem" id="infoIcon">
+            <img src="fish.png" alt="Help">
+            <span class="tooltip">help</span>
+        </div>
+    </div>
+
+    <div id="detailsModal" style="display: none;">
+        <span class="closeBtn" id="modalCloseBtn" onclick="closeDetailsModal()">✖</span>
+        
+        <div id="fishLayersMenu">
+            <h2 id="modalTitle"></h2>
+            
+            <img id="modalTopImage" src="" alt="Water Body" style="display: none; width: 100%; height: 200px; object-fit: cover; border-radius: 12px; margin-bottom: 15px; border: 1px solid #ddd;">
+
+            <div class="fish-row">
+                <div class="fish-item" id="histFish"><img src="historical.png" alt="Hist"><span class="tooltip">historical</span></div>
+                <div class="fish-item" id="cultFish"><img src="cultural.png" alt="Cult"><span class="tooltip">cultural</span></div>
+                <div class="fish-item" id="litFish"><img src="literary.png" alt="Lit"><span class="tooltip">literary</span></div>
+                <div class="fish-item" id="envFish"><img src="environmental.png" alt="Env"><span class="tooltip">environmental</span></div>
+            </div>
+            <p style="text-align:center; color:#999; font-size:14px; margin-top:-5px;">Select a layer icon to explore.</p>
+        </div>
+
+        <div id="modalDetailView" style="display: none;">
+            <div class="detail-header"><img id="activeFishIcon" src="" alt="Active Fish"></div>
+            <div id="modalMainContent"></div>
+            <div class="detail-footer">
+                <div id="backToLayersBtn">
+                    <span class="arrowBack">←</span>
+                    <span class="tooltip">back to all layers</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="infoBox" style="display: none;">
+        <span class="closeBtn" onclick="closeInfo()">✖</span>
+        <h3>How to Navigate?</h3>
+        <p>1. Click a <strong>State Marker</strong> to view state context.<br>2. Open the <strong>Side Panel</strong> to browse by category.</p>
+    </div>
+
+    <script>
+        const map = L.map('map').setView([22.5, 80], 5);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(map);
+
+        const states = [
+            { name: "West Bengal", coords: [23.5, 87.3] },
+            { name: "Odisha", coords: [20.3, 84.6] },
+            { name: "Madhya Pradesh", coords: [23.5, 78.5] },
+            { name: "Gujarat", coords: [22.5, 72.5] },
+            { name: "Jharkhand", coords: [23.8, 85.3] },
+            { name: "Bihar", coords: [25.5, 85.0] },
+            { name: "Uttar Pradesh", coords: [26.8, 80.9] },
+            { name: "Tamil Nadu", coords: [11.0, 78.7] }
+        ];
+
+        const stateIcon = L.icon({ iconUrl: "marker.png", iconSize: [32, 32], iconAnchor: [16, 32] });
+
+        states.forEach(st => {
+            const marker = L.marker(st.coords, { icon: stateIcon }).addTo(map);
+            marker.bindTooltip(st.name);
+            marker.on("click", () => {
+                localStorage.setItem("selectedState", st.name);
+                window.location.href = "state.html";
+            });
+        });
+
+        let activeMarker = null;
+
+        Papa.parse(waterBodiesData, {
+            header: true,
+            complete: function(results) {
+                const waterBodies = results.data;
+                const categories = ["Canal", "Lake", "Pond", "Tank", "Channel", "Dam"];
+                const container = document.getElementById("waterList");
+
+                categories.forEach(cat => {
+                    const filtered = waterBodies.filter(w => w.type && w.type.toLowerCase() === cat.toLowerCase());
+                    if (filtered.length > 0) {
+                        const catDiv = document.createElement("div");
+                        catDiv.className = "wbCategory";
+                        catDiv.innerHTML = `<div class="catLeft"><span class="arrow">▶</span><img src="${cat.toLowerCase()}.png" class="catIcon"><span>${cat.toUpperCase()}S</span></div>`;
+                        
+                        const list = document.createElement("div");
+                        list.className = "wbItems";
+                        list.style.display = "none";
+
+                        filtered.forEach(w => {
+                            const item = document.createElement("div");
+                            item.className = "wbItem";
+                            item.innerText = w.name;
+                            item.onclick = (e) => { 
+                                e.stopPropagation();
+                                selectWaterBody(w); 
+                                openDetailsModal(w); 
+                            };
+                            list.appendChild(item);
+                        });
+
+                        catDiv.onclick = () => {
+                            const isOpen = list.style.display === "block";
+                            list.style.display = isOpen ? "none" : "block";
+                            catDiv.querySelector(".arrow").innerText = isOpen ? "▶" : "▼";
+                        };
+                        container.appendChild(catDiv);
+                        container.appendChild(list);
+                    }
+                });
+            }
+        });
+
+        function selectWaterBody(w) {
+            document.getElementById("waterPanel").style.display = "none";
+            map.flyTo([w.lat, w.lon], 14);
+            if (activeMarker) map.removeLayer(activeMarker);
+            const customIcon = L.icon({ iconUrl: `${w.type.toLowerCase()}.png`, iconSize: [40, 40], iconAnchor: [20, 20] });
+            activeMarker = L.marker([w.lat, w.lon], { icon: customIcon }).addTo(map);
+        }
+
+        function openDetailsModal(w) {
+            toggleModalState("menu"); // Always start with image + fishes
+            document.getElementById("modalTitle").innerText = w.name;
+            
+            // Populate the top image
+            const topImg = document.getElementById("modalTopImage");
+            if (w.image && w.image.trim() !== "" && w.image !== "To be updated") {
+                topImg.src = w.image;
+                topImg.style.display = "block";
+            } else {
+                topImg.style.display = "none";
+            }
+
+            const layers = [
+                { id: 'histFish', key: 'historical', title: 'Historical', img: 'historical.png' },
+                { id: 'cultFish', key: 'cultural', title: 'Cultural', img: 'cultural.png' },
+                { id: 'litFish', key: 'literary', title: 'Literary', img: 'literary.png' },
+                { id: 'envFish', key: 'environmental', title: 'Environmental', img: 'environmental.png' }
+            ];
+
+            layers.forEach(layer => {
+                document.getElementById(layer.id).onclick = () => showLayerDetail(layer, w);
+            });
+
+            document.getElementById("backToLayersBtn").onclick = () => toggleModalState("menu");
+            document.getElementById("detailsModal").style.display = "block";
+        }
+
+        function toggleModalState(state) {
+            const menu = document.getElementById("fishLayersMenu");
+            const detail = document.getElementById("modalDetailView");
+            const closeBtn = document.getElementById("modalCloseBtn");
+            if (state === "detail") {
+                menu.style.display = "none"; closeBtn.style.display = "none"; detail.style.display = "block";
+            } else {
+                menu.style.display = "block"; closeBtn.style.display = "block"; detail.style.display = "none";
+            }
+        }
+
+        function showLayerDetail(layer, wData) {
+            const content = document.getElementById("modalMainContent");
+            document.getElementById("activeFishIcon").src = layer.img;
+            content.innerHTML = `
+                <h4>${layer.title} Context</h4>
+                <div style="font-size:15px; line-height:1.6; color:#333;">
+                    ${wData[layer.key] || "Data coming soon."}
+                </div>
+            `;
+            toggleModalState("detail");
+        }
+
+        function closeDetailsModal() { document.getElementById("detailsModal").style.display = "none"; }
+        function closeInfo() { document.getElementById("infoBox").style.display = "none"; }
+        function togglePanel() { 
+            const p = document.getElementById("waterPanel"); 
+            p.style.display = (p.style.display === "block") ? "none" : "block"; 
+        }
+        document.getElementById("wbToggleContainer").onclick = togglePanel;
+        document.getElementById("infoIcon").onclick = () => { document.getElementById("infoBox").style.display = "block"; };
+    </script>
+</body>
+</html>

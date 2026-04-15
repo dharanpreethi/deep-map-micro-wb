@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>State View | India Water Map</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/papaparse@5.3.2/papaparse.min.js"></script>
+    <script src="data.js"></script>
+    <style>
+        #map { height: 100vh; width: 100%; background: #f0f0f0; }
+        
+        #stateTitle {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 12px 30px;
+            border-radius: 50px;
+            z-index: 1001;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            font-weight: bold;
+            text-transform: uppercase;
+            font-family: sans-serif;
+            letter-spacing: 1px;
+        }
+
+        #mapLegend {
+            position: fixed;
+            bottom: 30px; 
+            left: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 13px;
+            border: 1px solid #eee;
+        }
+
+        .legendItem { display: flex; align-items: center; gap: 10px; color: #444; }
+        .legendItem img { width: 20px; height: 20px; object-fit: contain; }
+
+        /* The Image style for the Layers Box */
+        #modalTopImage {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            display: none; /* Hidden by default until loaded */
+        }
+    </style>
+</head>
+<body>
+
+    <div id="stateTitle">Loading...</div>
+
+    <div id="map"></div>
+
+    <div id="mapLegend">
+        <div class="legendItem"><img src="lake.png"> <span>Lakes</span></div>
+        <div class="legendItem"><img src="canal.png"> <span>Canals</span></div>
+        <div class="legendItem"><img src="pond.png"> <span>Ponds</span></div>
+        <div class="legendItem"><img src="tank.png"> <span>Tanks</span></div>
+        <div class="legendItem"><img src="channel.png"> <span>Channels</span></div>
+        <div class="legendItem"><img src="dam.png"> <span>Dams</span></div>
+    </div>
+
+    <div class="controls">
+        <div class="controlItem" onclick="window.location.href='map.html'">
+            <img src="compass.png" alt="Back">
+            <span class="tooltip">Main Map</span>
+        </div>
+    </div>
+
+    <div id="detailsModal" style="display: none;">
+        <span class="closeBtn" id="modalCloseBtn" onclick="closeDetailsModal()">✖</span>
+        
+        <div id="fishLayersMenu">
+            <h2 id="modalTitle"></h2>
+            
+            <img id="modalTopImage" src="" alt="Water Body">
+
+            <div class="fish-row">
+                <div class="fish-item" id="histFish"><img src="historical.png" alt="Hist"><span class="tooltip">historical</span></div>
+                <div class="fish-item" id="cultFish"><img src="cultural.png" alt="Cult"><span class="tooltip">cultural</span></div>
+                <div class="fish-item" id="litFish"><img src="literary.png" alt="Lit"><span class="tooltip">literary</span></div>
+                <div class="fish-item" id="envFish"><img src="environmental.png" alt="Env"><span class="tooltip">environmental</span></div>
+            </div>
+            <p style="text-align:center; color:#999; font-size:14px; margin-top:-5px;">Select a layer icon to explore.</p>
+        </div>
+
+        <div id="modalDetailView" style="display: none;">
+            <div class="detail-header"><img id="activeFishIcon" src="" alt="Icon"></div>
+            <div id="modalMainContent"></div>
+            <div class="detail-footer">
+                <div id="backToLayersBtn">
+                    <span class="arrowBack">←</span>
+                    <span class="tooltip">back to all layers</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const selectedState = localStorage.getItem("selectedState");
+        if (!selectedState) { window.location.href = "map.html"; }
+        document.getElementById("stateTitle").innerText = selectedState;
+
+        const map = L.map('map').setView([22.5, 82], 5);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(map);
+
+        Papa.parse(waterBodiesData, {
+            header: true,
+            dynamicTyping: true,
+            skipEmptyLines: true,
+            complete: function(results) {
+                const allRows = results.data;
+                const filtered = allRows.filter(w => {
+                    if (!w.state) return false;
+                    return w.state.toString().trim().toLowerCase() === selectedState.trim().toLowerCase();
+                });
+
+                if (filtered.length > 0) {
+                    const bounds = [];
+                    filtered.forEach(w => {
+                        if (w.lat && w.lon) {
+                            const iconUrl = w.type.toLowerCase() + ".png";
+                            const icon = L.icon({ 
+                                iconUrl: iconUrl, 
+                                iconSize: [30, 30],
+                                iconAnchor: [15, 15]
+                            });
+
+                            const marker = L.marker([w.lat, w.lon], { icon: icon }).addTo(map);
+                            marker.bindTooltip(w.name);
+                            marker.on("click", () => { openDetailsModal(w); });
+                            bounds.push([w.lat, w.lon]);
+                        }
+                    });
+                    map.fitBounds(bounds, { padding: [50, 50] });
+                }
+            }
+        });
+
+        function openDetailsModal(w) {
+            // Force reset to show the "Menu" (Image + 4 Fishes)
+            toggleModalState("menu");
+
+            document.getElementById("modalTitle").innerText = w.name;
+
+            // Load the top image into the Layers Box
+            const topImg = document.getElementById("modalTopImage");
+            if (w.image && w.image.trim() !== "" && w.image !== "To be updated") {
+                topImg.src = w.image;
+                topImg.style.display = "block";
+            } else {
+                topImg.style.display = "none";
+            }
+
+            const layers = [
+                { id: 'histFish', key: 'historical', title: 'Historical', img: 'historical.png' },
+                { id: 'cultFish', key: 'cultural', title: 'Cultural', img: 'cultural.png' },
+                { id: 'litFish', key: 'literary', title: 'Literary', img: 'literary.png' },
+                { id: 'envFish', key: 'environmental', title: 'Environmental', img: 'environmental.png' }
+            ];
+
+            layers.forEach(layer => {
+                document.getElementById(layer.id).onclick = () => showLayerDetail(layer, w);
+            });
+
+            document.getElementById("backToLayersBtn").onclick = () => toggleModalState("menu");
+            document.getElementById("detailsModal").style.display = "block";
+        }
+
+        function toggleModalState(state) {
+            const menu = document.getElementById("fishLayersMenu");
+            const detail = document.getElementById("modalDetailView");
+            const closeBtn = document.getElementById("modalCloseBtn");
+            if (state === "detail") {
+                menu.style.display = "none"; closeBtn.style.display = "none"; detail.style.display = "block";
+            } else {
+                menu.style.display = "block"; closeBtn.style.display = "block"; detail.style.display = "none";
+            }
+        }
+
+        function showLayerDetail(layer, wData) {
+            const content = document.getElementById("modalMainContent");
+            document.getElementById("activeFishIcon").src = layer.img;
+            
+            // Using innerHTML so your <a> tags work
+            content.innerHTML = `
+                <h4 style="margin-bottom:10px;">${layer.title} Context</h4>
+                <div style="font-size:15px; line-height:1.6; color:#333;">
+                    ${wData[layer.key] || "Data coming soon."}
+                </div>
+            `;
+            toggleModalState("detail");
+        }
+
+        function closeDetailsModal() { document.getElementById("detailsModal").style.display = "none"; }
+        setTimeout(() => { map.invalidateSize(); }, 500);
+    </script>
+</body>
+</html>

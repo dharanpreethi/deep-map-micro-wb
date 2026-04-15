@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Deep Mapping Project</title>
+  <style>
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: Arial;
+    }
+
+    /* BACKGROUND */
+    body {
+      background: url("bg.png") no-repeat center center fixed;
+      background-size: cover;
+      position: relative;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 100%;
+      background: rgba(255,255,255,0.4);
+      z-index: 0;
+    }
+
+    /* SPLASH SCREEN */
+    #splash {
+      position: absolute;
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 2;
+    }
+
+    .fishRow {
+      display: flex;
+      gap: 40px;
+    }
+
+    .fishRow img {
+      width: 90px;
+      transform: scale(0);
+      animation: zoomIn 1.2s forwards;
+    }
+
+    .fishRow img:nth-child(1) { animation-delay: 0s; }
+    .fishRow img:nth-child(2) { animation-delay: 0.2s; }
+    .fishRow img:nth-child(3) { animation-delay: 0.4s; }
+    .fishRow img:nth-child(4) { animation-delay: 0.6s; }
+
+    @keyframes zoomIn {
+      to { transform: scale(1); }
+    }
+
+    .loading {
+      margin-top: 20px;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    /* WELCOME SCREEN */
+    #welcome {
+      display: none;
+      position: absolute;
+      width: 100%;
+      height: 100vh;
+      justify-content: center;
+      align-items: center;
+      z-index: 2;
+    }
+
+    .box {
+      background: rgba(255,255,255,0.6);
+      padding: 40px;
+      width: 60%;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+
+    .box h1 {
+      margin: 0;
+      font-size: 28px;
+    }
+
+    .box h2 {
+      margin: 10px 0;
+      font-size: 22px;
+    }
+
+    .box p {
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+
+    .btn {
+      padding: 12px 25px;
+      border: 2px solid black;
+      background: transparent;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .btn:hover {
+      background: rgba(0,0,0,0.1);
+    }
+
+  </style>
+</head>
+
+<body>
+
+<!-- SPLASH -->
+<div id="splash">
+
+  <div class="fishRow">
+    <img src="historical.png">
+    <img src="cultural.png">
+    <img src="literary.png">
+    <img src="environmental.png">
+  </div>
+
+  <div class="loading">loading...</div>
+
+</div>
+
+<!-- WELCOME -->
+<div id="welcome">
+
+  <div class="box">
+
+    <h1>Welcome to the Project</h1>
+    <h2 id="title">Deep Mapping of Micro Water Bodies</h2>
+    <p id="desc">
+      This project uses deep mapping to document the cultural and ecological significance of overlooked Indian micro waterbodies. It integrates these histories into an interactive digital visualization to promote public awareness and environmental preservation.
+    </p>
+<div class="project-credits">
+    <p><strong>Creators:</strong> Aditya Kumar, Simanta Nandi, Simran Bhimjyani, Shanmugapriya T</p>
+    <p><strong>Contact:</strong> <a href="mailto:shanmugapriya@iitism.ac.in">shanmugapriya@iitism.ac.in</a></p>
+
+<p class="institution">
+        Department of Humanities and Social Sciences<br>
+        Indian Institute of Technology (Indian School of Mines), Dhanbad
+    </p>
+</div>
+    <button class="btn" onclick="goNext()">Let's Explore</button>
+
+  </div>
+
+</div>
+
+<script>
+
+  // AFTER 2 SECONDS SWITCH SCREEN
+  setTimeout(function(){
+    document.getElementById("splash").style.display = "none";
+    document.getElementById("welcome").style.display = "flex";
+  }, 2000);
+
+  // BUTTON ACTION
+  function goNext(){
+    window.location = "map.html";
+  }
+
+</script>
+
+</body>
+</html>

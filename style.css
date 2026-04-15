@@ -1,0 +1,376 @@
+/* ============================================================
+   1. GLOBAL STYLES
+   ============================================================ */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    overflow: hidden;
+}
+
+#map { 
+    height: 100vh; 
+    width: 100%; 
+    z-index: 1; 
+}
+
+/* ============================================================
+   2. UI TOGGLES & TOOLTIPS (Black Box Style)
+   ============================================================ */
+.wb-container {
+    position: absolute;
+    top: 20px;
+    left: 75px; 
+    z-index: 1001;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+#wbIcon {
+    width: 40px;
+    height: auto;
+}
+
+/* Global Tooltip Class - Pure Black Box */
+.tooltip {
+    visibility: hidden;
+    background-color: #000000;
+    color: #ffffff;
+    text-align: center;
+    padding: 6px 14px;
+    border-radius: 4px;
+    font-size: 13px;
+    white-space: nowrap;
+    position: absolute;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+    z-index: 5000;
+    text-transform: lowercase; /* Keeps text minimalist */
+}
+
+/* Sidebar/Nav Tooltip Positioning */
+.wb-container .tooltip, 
+.controlItem .tooltip {
+    left: 60px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.wb-container:hover .tooltip,
+.controlItem:hover .tooltip,
+.fish-item:hover .tooltip,
+#backToLayersBtn:hover .tooltip {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* ============================================================
+   3. SIDE PANEL & LISTS
+   ============================================================ */
+#waterPanel {
+    display: none;
+    position: fixed;
+    top: 80px;
+    left: 75px; 
+    width: 280px;
+    max-height: 70vh;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 20px;
+    z-index: 2000;
+    overflow-y: auto;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    border-radius: 12px;
+}
+
+.panelHeader {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 10px;
+}
+
+.wbCategory {
+    display: flex;
+    align-items: center;
+    padding: 10px 5px;
+    border-bottom: 1px solid #eee;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.catLeft {
+    display: flex;
+    align-items: center;
+    gap: 12px; 
+}
+
+.catIcon {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+}
+
+.arrow {
+    font-size: 10px;
+    color: #666;
+    width: 12px;
+}
+
+.wbItem {
+    padding: 6px 10px;
+    font-size: 14px;
+    color: #444;
+    cursor: pointer;
+    margin-left: 35px;
+}
+
+.wbItem:hover { background: #f0f0f0; color: #000; }
+
+/* ============================================================
+   4. NAVIGATION CONTROLS (Bottom Left)
+   ============================================================ */
+.controls {
+    position: fixed;
+    bottom: 30px;
+    left: 75px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    z-index: 1000;
+}
+
+.controlItem {
+    position: relative;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.controlItem img {
+    width: 100%;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+}
+
+/* ============================================================
+   5. POPUP BOXES & BUTTONS
+   ============================================================ */
+.closeBtn {
+    cursor: pointer;
+    font-size: 20px;
+    color: #999;
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    transition: color 0.2s;
+    z-index: 10;
+    margin-top: -4px; /* This nudges only the symbol upward */
+}
+
+/* Specific fix for the Water Panel X */
+.panelHeader .closeBtn {
+    position: relative; /* Overrides absolute if necessary */
+    top: 0; 
+    right: 0;
+    line-height: 0.8; /* Tightens the bounding box */
+    transform: translateY(-2px); /* Specifically nudges it up */
+}
+.closeBtn:hover { color: #ff4444; }
+
+#infoBox {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    z-index: 4000;
+    width: 350px;
+    padding: 25px;
+}
+
+/* ============================================================
+   6. DETAILS MODAL (Two-State Card)
+   ============================================================ */
+#detailsModal {
+    width: 450px;
+    max-height: 85vh;
+    padding: 30px;
+    overflow-y: auto;
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 15px 50px rgba(0,0,0,0.3);
+    z-index: 4000;
+}
+
+/* Layer Menu State */
+.fish-row {
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    margin-bottom: 20px;
+}
+
+.fish-item {
+    position: relative;
+    cursor: pointer; /* Makes cursor a hand for all 4 fishes */
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.fish-item img { 
+    width: 45px; 
+    height: auto; 
+}
+
+.fish-item:hover img { 
+    transform: scale(1.3); 
+}
+
+/* Detail View State */
+.detail-header {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+#activeFishIcon {
+    width: 50px;
+    height: auto;
+    cursor: default; /* Arrow cursor here as it's just a display icon now */
+}
+
+.detail-footer {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: flex-start;
+}
+
+#backToLayersBtn {
+    cursor: pointer; /* Makes cursor a hand for the back arrow */
+    position: relative;
+    font-size: 24px;
+    color: #666;
+    transition: color 0.2s, transform 0.2s;
+}
+
+#backToLayersBtn:hover {
+    color: #000;
+    transform: translateX(-5px);
+}
+
+/* Content Styling */
+.modalImage {
+    width: 100%;
+    max-height: 250px;
+    object-fit: cover;
+    border-radius: 12px;
+    margin-bottom: 15px;
+}
+
+#modalMainContent h4 { 
+    text-align: center; 
+    margin-bottom: 15px; 
+    color: #34495e; 
+}
+
+#modalMainContent p { 
+    font-size: 15px; 
+    color: #555; 
+    line-height: 1.6; 
+}
+/* ============================================================
+   7. STATE MAP LEGEND (Lakes, Canals, etc.)
+   ============================================================ */
+#mapLegend {
+    position: fixed;
+    bottom: 140px !important; 
+    top: auto !important;
+    
+    /* Increased from 75px to 100px to shift it right */
+    left: 40px !important; 
+    
+    width: 120px; 
+    background: white;
+    padding: 12px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    z-index: 1000;
+    box-sizing: border-box; 
+}
+/* ============================================================
+   LEXICON ICON STYLES
+   ============================================================ */
+.lex-container {
+    position: absolute;
+    top: 25px;
+    left: 130px; /* Positions it to the right of the WB icon (75px + width + gap) */
+    z-index: 1001;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+#lexIcon {
+    width: 60px;
+    height: 30px;
+}
+
+/* Reusing your tooltip logic for Lexicon */
+.lex-container:hover .tooltip {
+    visibility: visible;
+    opacity: 1;
+}
+
+.lex-container .tooltip {
+    left: 60px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+/* ============================================================
+   PROJECT CREDITS STYLING
+   ============================================================ */
+.project-credits {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #eee; /* Subtle line to separate description from credits */
+}
+
+.project-credits p {
+    font-size: 14px;
+    color: #555;
+    margin: 5px 0;
+    line-height: 1.4;
+}
+
+.project-credits a {
+    color: #007bff; /* Professional blue for the email link */
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.project-credits a:hover {
+    text-decoration: underline;
+    color: #0056b3;
+}
+.institution {
+    margin-top: 10px !important;
+    font-style: italic;
+    font-size: 13px !important;
+    color: #777 !important;
+    line-height: 1.5;
+}
