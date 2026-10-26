@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>India Water Map | Deep Mapping of Micro Water Bodies</title>
+  <script src="prefs.js"></script>
+  <meta name="description" content="A 3D deep map of India's overlooked micro water bodies — their historical, cultural, literary and environmental layers.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Mukta:wght@300;400;500;600;700&family=Tiro+Devanagari+Hindi&family=Noto+Sans+Bengali:wght@400;600&family=Noto+Sans+Oriya:wght@400;600&family=Noto+Sans+Gujarati:wght@400;600&family=Noto+Sans+Tamil:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="logo.svg" type="image/svg+xml">
+  <script src="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
+  <script src="https://unpkg.com/papaparse@5.3.2/papaparse.min.js"></script>
+  <script src="data.js"></script>
+  <script src="icons.js"></script>
+  <script src="geo-india.js"></script>
+  <script src="basemaps.js"></script>
+  <script src="photos.js"></script>
+  <script src="sound.js"></script>
+</head>
+<body class="atlas">
+
+  <div id="map" aria-label="Interactive 3D map of India's micro water bodies"></div>
+  <div class="vignette"></div>
+
+  <!-- intro veil -->
+  <div class="veil" id="veil">
+    <div>
+      <div id="veilLogo" style="display:flex;justify-content:center"></div>
+      <p>Unfolding the deep map<span class="deva">जल · स्मृति · मानचित्र</span></p>
+    </div>
+  </div>
+
+  <!-- title cartouche -->
+  <a class="cartouche paper gilt" href="index.html" title="Back to the project home">
+    <span id="logoSlot"></span>
+    <span>
+      <span class="eyebrow">A blue humanities deep map</span>
+      <h1>Deep Mapping of Micro Water Bodies</h1>
+      <span class="tag">जल · स्मृति · मानचित्र — water · memory · map</span>
+    </span>
+  </a>
+
+  <!-- left rail -->
+  <nav class="rail rail-left paper" aria-label="Atlas navigation">
+    <button class="rbtn" data-act="home"><span data-ico="home"></span><span class="tip">Project home</span></button>
+    <button class="rbtn" data-act="india"><span data-ico="india"></span><span class="tip">All-India view</span></button>
+    <div class="sep"></div>
+    <button class="rbtn" data-act="list" aria-pressed="false"><span data-ico="list"></span><span class="tip">Water body list · जल सूची</span></button>
+    <button class="rbtn" data-act="tour" aria-pressed="false"><span data-ico="tour"></span><span class="tip">Guided tour</span></button>
+    <button class="rbtn" data-act="lexicon"><span data-ico="lexicon"></span><span class="tip">Lexicon · शब्दकोश</span></button>
+    <div class="sep"></div>
+    <button class="rbtn" data-act="help"><span data-ico="help"></span><span class="tip">How to navigate</span></button>
+    <button class="rbtn" data-pop="langPop" aria-expanded="false" aria-label="Choose language"><span data-ico="lang"></span><span class="tip">Language · भाषा</span></button>
+    <button class="rbtn" data-pop="a11yPop" aria-expanded="false" aria-label="Reading and accessibility"><span data-ico="a11y"></span><span class="tip">Reading &amp; accessibility</span></button>
+    <button class="rbtn" data-act="menu" aria-expanded="false"><span data-ico="menu"></span><span class="tip">All pages</span></button>
+  </nav>
+
+  <!-- right rail: map controls -->
+  <nav class="rail rail-right paper" aria-label="Map controls">
+    <button class="rbtn" data-act="zin"><span data-ico="plus"></span><span class="tip">Zoom in</span></button>
+    <button class="rbtn" data-act="zout"><span data-ico="minus"></span><span class="tip">Zoom out</span></button>
+    <div class="sep"></div>
+    <button class="rbtn" data-act="tilt" aria-pressed="true"><span data-ico="tilt"></span><span class="tip">3D tilt</span></button>
+    <button class="rbtn" data-act="terrain" aria-pressed="true"><span data-ico="terrain"></span><span class="tip">Relief &amp; terrain</span></button>
+    <button class="rbtn" data-act="theme"><span data-ico="layers"></span><span class="tip">Map style</span></button>
+    <button class="rbtn" data-act="sound" aria-pressed="false"><span class="snd-ico"></span><span class="tip" id="soundTip">Sound</span></button>
+    <button class="rbtn hide-sm" data-act="full"><span data-ico="expand"></span><span class="tip">Full screen</span></button>
+  </nav>
+
+  <!-- theme popover -->
+  <div class="pop paper" id="themePop" role="dialog" aria-label="Map style">
+    <h4>Map style</h4>
+    <button class="theme-opt" data-theme="pothi"><span class="sw sw-pothi"></span><span><b>Pothi <span class="deva">पोथी</span></b><span>Parchment atlas, engraved relief</span></span></button>
+    <button class="theme-opt" data-theme="akash"><span class="sw sw-akash"></span><span><b>Akash <span class="deva">आकाश</span></b><span>Satellite imagery from above</span></span></button>
+    <button class="theme-opt" data-theme="raat"><span class="sw sw-raat"></span><span><b>Raat <span class="deva">रात</span></b><span>Indigo night, gold lettering</span></span></button>
+    <div class="toggle-row"><span>3D terrain &amp; hill shading</span><button class="switch" id="terrainSwitch" role="switch" aria-checked="true" aria-label="Terrain"></button></div>
+    <div class="range-row"><span>Relief</span><input type="range" id="exag" min="1" max="3" step=".1" value="1.6" aria-label="Terrain exaggeration"><span id="exagV">1.6×</span></div>
+  </div>
+
+  <!-- compass rose -->
+  <button class="rose-wrap" id="rose" title="Reset bearing to north (उत्तर)" aria-label="Reset bearing to north"><span id="roseSvg"></span><span class="pitch" id="pitchLbl"></span></button>
+
+  <!-- legend -->
+  <aside class="legend paper" id="legend">
+    <h3>Water forms <small class="deva">जल रूप</small><button class="lg-toggle" id="lgToggle" aria-label="Collapse legend"><span data-ico="chevron"></span></button></h3>
+    <div class="lg-body">
+      <div class="lg-types" id="lgTypes"></div>
+      <div class="lg-ring">
+        <span><i style="--c:var(--hist)"></i>Historical</span>
+        <span><i style="--c:var(--cult)"></i>Cultural</span>
+        <span><i style="--c:var(--lit)"></i>Literary</span>
+        <span><i style="--c:var(--env)"></i>Environmental</span>
+        <span class="note">The ring around each marker shows its four layers of memory — solid when written, dotted when only sources are gathered.</span>
+      </div>
+    </div>
+  </aside>
+
+  <div class="coords" id="coords"></div>
+
+  <!-- state banner -->
+  <div class="state-card paper" id="stateCard" aria-live="polite">
+    <button class="back" id="stateBack" title="Back to all of India"><span data-ico="back"></span></button>
+    <div class="nm"><span class="deva" id="scNative"></span><b id="scName"></b></div>
+    <div class="tcounts" id="scCounts"></div>
+  </div>
+
+  <!-- water body list (Jal Suchi) -->
+  <aside class="drawer drawer-left paper" id="suchi" aria-label="Water bodies list" aria-hidden="true">
+    <button class="xbtn" data-close="suchi" aria-label="Close list"><span data-ico="close"></span></button>
+    <div class="drawer-head">
+      <h2>Water Bodies<span class="deva">जल सूची</span></h2>
+      <label class="search"><span data-ico="search"></span><input id="q" type="search" placeholder="Search names, places, stories…" autocomplete="off" aria-label="Search water bodies"><kbd>/</kbd></label>
+      <div class="chips" id="chips"></div>
+      <div class="selrow">
+        <select id="stateSel" aria-label="Filter by state"></select>
+        <span class="count" id="countLbl"></span>
+      </div>
+    </div>
+    <div class="list" id="list"></div>
+  </aside>
+
+  <!-- folio: water body details -->
+  <aside class="drawer drawer-right paper folio" id="folio" aria-label="Water body details" aria-hidden="true">
+    <button class="xbtn" data-close="folio" aria-label="Close details"><span data-ico="close"></span></button>
+    <div class="scroll" id="folioScroll">
+      <div class="folio-hero" id="fHero"></div>
+      <div class="np-chip" id="npChip" hidden><span class="eq"><i></i><i></i><i></i></span><span id="npName"></span></div>
+      <div class="folio-head">
+        <div class="eyebrow" id="fEyebrow"></div>
+        <h2 id="fTitle"></h2>
+        <div class="geo" id="fGeo"></div>
+      </div>
+      <div class="completeness" id="fComplete"></div>
+      <div class="layer-tabs" role="tablist" id="fTabs"></div>
+      <div class="layer-panel" id="fPanel" role="tabpanel"></div>
+    </div>
+    <div class="folio-foot">
+      <button class="fbtn icon" id="fPrev" title="Previous water body (←)"><span data-ico="prev"></span></button>
+      <span class="pos" id="fPos"></span>
+      <button class="fbtn" id="fFly" title="Fly to this water body"><span data-ico="locate"></span>Fly here</button>
+      <button class="fbtn" id="fLink" title="Copy a link to this water body"><span data-ico="link"></span>Link</button>
+      <button class="fbtn icon" id="fNext" title="Next water body (→)"><span data-ico="next"></span></button>
+    </div>
+  </aside>
+
+  <!-- guided tour -->
+  <section class="tour paper gilt" id="tour" aria-live="polite">
+    <div class="eyebrow"><span data-ico="tour"></span>Guided tour · जल परिक्रमा <span id="tourPos" style="margin-left:auto;color:var(--ink-3);letter-spacing:.06em"></span></div>
+    <img id="tourImg" class="tour-img" alt="" hidden>
+    <h3 id="tourTitle"></h3>
+    <div class="meta" id="tourMeta"></div>
+    <p id="tourText"></p>
+    <div class="ctrls">
+      <button class="fbtn icon" id="tPrev" title="Previous stop"><span data-ico="prev"></span></button>
+      <button class="fbtn icon" id="tPlay" title="Pause / play"><span data-ico="pause"></span></button>
+      <button class="fbtn icon" id="tNext" title="Next stop"><span data-ico="next"></span></button>
+      <div class="progress"><i id="tBar"></i></div>
+      <button class="fbtn" id="tOpen"><span data-ico="book"></span>Open folio</button>
+      <button class="fbtn icon" id="tStop" title="End the journey"><span data-ico="stop"></span></button>
+    </div>
+  </section>
+
+  <div class="hovercard paper" id="hovercard"></div>
+  <div class="toast paper" id="toast"></div>
+
+  <!-- help -->
+  <div class="modal-back" id="help" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+    <div class="modal paper gilt">
+      <button class="xbtn" data-close="help" aria-label="Close help"><span data-ico="close"></span></button>
+      <h2 id="helpTitle">How to navigate</h2>
+      <p class="lead">This atlas is a <em>deep map</em>: every water body carries four layers of memory you can open one by one.</p>
+      <div class="howto" id="howto"></div>
+      <div class="keys">
+        <span><kbd>/</kbd> search</span><span><kbd>←</kbd> <kbd>→</kbd> previous / next water body</span><span><kbd>1</kbd>–<kbd>4</kbd> open a layer</span><span><kbd>Esc</kbd> close</span><span><kbd>Ctrl</kbd> + drag · tilt &amp; rotate</span>
+      </div>
+    </div>
+  </div>
+
+  <script src="site.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

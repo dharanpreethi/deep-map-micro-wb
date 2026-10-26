@@ -1,0 +1,24 @@
+{
+  "title": "Deep Mapping of Micro Water Bodies",
+  "upload_type": "software",
+  "description": "<p><strong>Deep Mapping of Micro Water Bodies</strong> is a Blue Digital Humanities project: an interactive 3D deep map of the historical, cultural, literary and environmental memories of India's micro water bodies, including ponds, kunds, tanks, canals and channels.</p><p>Each water body opens into four layers of memory: historical, cultural, literary and environmental. The website brings these layers together with photographs, soundscapes, a lexicon of Indian water words and citation tools.</p><p>Department of Humanities and Social Sciences, Indian Institute of Technology (Indian School of Mines) Dhanbad.</p>",
+  "creators": [
+    { "name": "Shanmugapriya, T.", "affiliation": "Indian Institute of Technology (Indian School of Mines) Dhanbad" },
+    { "name": "Bhimjyani, Simran", "affiliation": "Indian Institute of Technology (Indian School of Mines) Dhanbad" },
+    { "name": "Nandi, Simanta", "affiliation": "Indian Institute of Technology (Indian School of Mines) Dhanbad" },
+    { "name": "Kumar, Aditya", "affiliation": "Indian Institute of Technology (Indian School of Mines) Dhanbad" }
+  ],
+  "access_right": "open",
+  "license": "cc-by-nc-4.0",
+  "language": "eng",
+  "keywords": [
+    "Blue Digital Humanities",
+    "Digital Environmental Humanities",
+    "deep mapping",
+    "micro water bodies",
+    "water heritage",
+    "India",
+    "cultural memory",
+    "web map"
+  ]
+}

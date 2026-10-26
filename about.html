@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>About the Project · Deep Mapping of Micro Water Bodies</title>
+  <meta name="description" content="Project brief, research questions, objectives, method and findings of the Deep Mapping of Micro Water Bodies (DMIMW) project.">
+  <meta property="og:title" content="About the Project · Deep Mapping of Micro Water Bodies">
+  <meta property="og:description" content="Project brief, research questions, objectives, method and findings of the Deep Mapping of Micro Water Bodies (DMIMW) project.">
+  <meta name="theme-color" content="#1f3364">
+  <script src="prefs.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Mukta:wght@300;400;500;600;700&family=Tiro+Devanagari+Hindi&family=Noto+Sans+Bengali:wght@400;600&family=Noto+Sans+Oriya:wght@400;600&family=Noto+Sans+Gujarati:wght@400;600&family=Noto+Sans+Tamil:wght@400;600&family=Noto+Sans+Ol+Chiki&display=swap">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="site.css">
+  <link rel="icon" href="logo.svg" type="image/svg+xml">
+</head>
+<body class="page" data-page="about">
+  <header id="site-header"></header>
+  <main id="main">
+<section class="phero">
+  <div class="wrap">
+    <div>
+      <nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Home</a><span>Project &amp; About</span><span>About the Project</span></nav>
+      <span class="eyebrow">About the project</span>
+      <h1>Revisiting Indian Micro-Waterbodies</h1>
+      <div class="sub">An interactive deep map of literary, cultural, historical and environmental memories</div>
+      <p class="lead">Deep Mapping of Micro Water Bodies (DMIMW) is among the first Blue Digital Humanities projects from India. It documents the overlooked ponds, tanks, kunds, canals and channels of the subcontinent through four layers of memory, on a map anyone can explore.</p>
+    </div>
+    <div class="ripple-art" data-art="fish"></div>
+  </div>
+</section>
+
+<div class="wrap with-toc">
+  <aside class="toc" aria-label="On this page">
+    <h2>On this page</h2>
+    <a href="#brief">Project brief</a>
+    <a href="#questions">Research questions</a>
+    <a href="#objectives">Objectives</a>
+    <a href="#method">Method: deep map + IDN</a>
+    <a href="#layers">Four layers &amp; the fish narrators</a>
+    <a href="#build">How we built it</a>
+    <a href="#cases">Case studies</a>
+    <a href="#findings">Findings</a>
+    <a href="#related">Related Indian projects</a>
+    <a href="#future">Limitations &amp; next steps</a>
+    <a href="#refs">Selected references</a>
+  </aside>
+  <div>
+    <section class="about-sec prose" id="brief">
+      <span class="eyebrow">Project brief</span>
+      <h2>Small waters, deep memories</h2>
+      <p class="dropcap">The idea grew out of the AHRC-funded project <em>Digital Innovation in Water Scarcity in Coimbatore, India</em>, where Shanmugapriya T. worked as a postdoctoral research associate. That work showed that micro water bodies — channels, canals, weirs, streams, ponds, rivulets and tanks — received little attention from colonial or postcolonial governments, even though they are what gather water across mountains and feed the large dams and lakes.</p>
+      <p>These waters are local, situated within a district or region, and culturally significant to the people who live beside them. They reduce the distance between water, culture and people and help build collective consciousness. This project studies how they become part of cultural, historical, literary and ecological memory by creating <em>thick descriptions</em> of each one.</p>
+      <p id="liveCount">The platform currently maps water bodies across several Indian states, and grows as the team adds more.</p>
+      <blockquote class="pull">Small waters remain the least investigated part of the water environment.<cite>Biggs, von Fumetti &amp; Kelly-Quinn, <em>Hydrobiologia</em> (2017)</cite></blockquote>
+    </section>
+
+    <section class="about-sec" id="questions">
+      <span class="eyebrow">Research questions</span>
+      <h2>Three questions guide the work</h2>
+      <ol class="rq">
+        <li>How can deep mapping reveal the cultural, historical, literary and environmental significance of micro water bodies in India?</li>
+        <li>How is the memory of micro water bodies preserved in historical records, imagined in literary texts, practised in cultural traditions and sustained in ecological systems?</li>
+        <li>How can digital humanities tools help document the memories of micro water bodies?</li>
+      </ol>
+    </section>
+
+    <section class="about-sec" id="objectives">
+      <span class="eyebrow">Objectives</span>
+      <h2>What the project sets out to do</h2>
+      <div class="objectives">
+        <div class="card" style="--c:var(--hist)"><span class="ic-tile" data-ui-ico="pin2"></span><h3>Make the overlooked visible</h3><p>Place India's micro water bodies on an interactive map, beside the dominant narratives of large rivers and dams.</p></div>
+        <div class="card" style="--c:var(--cult)"><span class="ic-tile" data-ui-ico="layers"></span><h3>Layer memory, not flatten it</h3><p>Record each site through historical, cultural, literary and environmental layers that can be read in any order.</p></div>
+        <div class="card" style="--c:var(--lit)"><span class="ic-tile" data-ui-ico="team"></span><h3>Speak to everyone</h3><p>Serve Blue Humanities scholars and the general public alike, with plain language, translation and accessible design.</p></div>
+        <div class="card" style="--c:var(--env)"><span class="ic-tile" data-ui-ico="leaf"></span><h3>Raise ecological urgency</h3><p>Show where sacred and literary memory sits beside pollution, siltation and neglect, and press for care.</p></div>
+        <div class="card" style="--c:var(--teal)"><span class="ic-tile" data-ui-ico="code"></span><h3>Stay open</h3><p>Build with open tools and open data, host for free, and keep the platform open access beyond the academy.</p></div>
+        <div class="card" style="--c:var(--saffron)"><span class="ic-tile" data-ui-ico="lexicon"></span><h3>Grow a water lexicon</h3><p>Collect the many names for water bodies in the team's languages towards a multilingual dictionary.</p></div>
+      </div>
+    </section>
+
+    <section class="about-sec prose" id="method">
+      <span class="eyebrow">Method</span>
+      <h2>Deep mapping through Interactive Digital Narrative</h2>
+      <p>Most digital humanities methods favour quantification. Deep mapping favours layering, multiplicity and plurality. The term comes from William Least Heat-Moon's <em>PrairyErth</em>, which borrowed Clifford Geertz's idea of thick description to explore a single Kansas county through geography, history, ecology, memory and story. David Bodenhamer describes the deep map as a medium that encourages multiplicity and competing perspectives.</p>
+      <p>Interactive Digital Narrative (IDN), as theorised by Hartmut Koenitz, gives that layering an architecture: a multimodal system in which the reader's choices shape what they encounter. If deep mapping decides <em>what</em> to gather, IDN decides <em>how</em> to present it. Together they let you build your own understanding of a water body instead of following a single story.</p>
+      <h3>Janet Murray's affordances, mapped onto the site</h3>
+    </section>
+    <div class="affords">
+      <div class="card"><h3><span data-ui-ico="tilt"></span>Four properties</h3><dl>
+        <dt>Procedural &amp; participatory</dt><dd>Clicks, layers and filters respond to every choice you make.</dd>
+        <dt>Spatial</dt><dd>The map of India is the main way through the archive — from globe to state to site.</dd>
+        <dt>Encyclopaedic</dt><dd>Dozens of water bodies across several states, each with four layers and linked sources.</dd></dl></div>
+      <div class="card"><h3><span data-ui-ico="sparkle"></span>Four aesthetic qualities</h3><dl>
+        <dt>Immersion</dt><dd>The 3D map, photographs, soundscapes and the fish narrators hold your attention.</dd>
+        <dt>Agency</dt><dd>You choose the state, the water body and the layer to enter first.</dd>
+        <dt>Transformation &amp; kaleidoscope</dt><dd>The same place yields a different arrangement of memory depending on where you begin — overlooked becomes meaningful.</dd></dl></div>
+    </div>
+
+    <section class="about-sec" id="layers">
+      <span class="eyebrow">Four layers &amp; the fish narrators</span>
+      <h2>Four fish, four ways of remembering</h2>
+      <p class="prose" style="max-width:42rem">Four Indian fish narrate the four layers: an aged golden mahseer for history, a rohu dressed like a Bengali wedding fish for culture, a scholarly hilsa for literature and a distressed magur catfish for the environment. They make the layering legible for a general audience, and remind us of what remains unheard: the memories water shares with other species.</p>
+      <div class="layers-grid" id="layerGrid" style="margin-top:1.2rem"></div>
+    </section>
+
+    <section class="about-sec" id="build">
+      <span class="eyebrow">How we built it</span>
+      <h2>From native regions to an open map</h2>
+      <div class="steps">
+        <div class="step"><span class="dot" data-ui-ico="pin2"></span><div><h3>Collect where we belong</h3><p>Each team member gathered data from their native or nearby regions — West Bengal, Odisha, Madhya Pradesh, Bihar, Jharkhand, Gujarat, Uttar Pradesh and Tamil Nadu — for familiarity with the sites and their contexts.</p></div></div>
+        <div class="step"><span class="dot" data-ui-ico="book"></span><div><h3>Read the open traces</h3><p>Sources include Wikipedia, travel blogs, community websites, social media, news reports and research papers. Each layer gets a brief written account, with links so readers can follow the sources themselves.</p></div></div>
+        <div class="step"><span class="dot" data-ui-ico="image"></span><div><h3>Add image and sound</h3><p>Photographs, links to videos, documentaries and posts animate each place. Soundscapes in the style of tanpura, bansuri, santoor, ektara and temple bells are generated in code, so no audio files need to download.</p></div></div>
+        <div class="step"><span class="dot" data-ui-ico="code"></span><div><h3>Build with open tools</h3><p>The site was designed and built by Aditya Kumar and Simanta Nandi with inputs from Shanmugapriya T. and Simran Bhimjyani, using HTML, CSS and JavaScript, OpenStreetMap and CARTO, and hosted for free on GitHub.</p>
+          <div class="stack"><span class="chip-s">HTML · CSS · JavaScript</span><span class="chip-s">MapLibre GL</span><span class="chip-s">OpenStreetMap &amp; CARTO</span><span class="chip-s">Natural Earth</span><span class="chip-s">Web Audio API</span><span class="chip-s">GitHub Pages</span></div></div></div>
+      </div>
+    </section>
+
+    <section class="about-sec" id="cases">
+      <span class="eyebrow">Case studies</span>
+      <h2>Three water bodies, read in depth</h2>
+      <div class="grid g3" id="aboutCases"></div>
+    </section>
+
+    <section class="about-sec prose" id="findings">
+      <span class="eyebrow">Findings</span>
+      <h2>What the deep map makes visible</h2>
+      <p><b>Memory and protection run on separate axes.</b> Long, diachronic memory survives in ritual, classical literature, mythology and community song. The environmental layer shows the present: the significance of the former does not translate into institutional protection of the latter. The deep map shows that disconnection within a single frame.</p>
+      <p><b>Micro water bodies are remembered informally.</b> Large waters are documented by institutions and colonial records. Micro water bodies live in oral tradition, regional literature and mythology, and reach the digital world through Wikipedia, community websites, social media and blogs — sources whose survival depends on platforms and on the community's continued interest.</p>
+      <p><b>The naming itself is a form of memory.</b> Damodar and Adi Ganga carry mythological connections; the Kalingarayan Canal carries the name of the chieftain who built it, and with it a story of social obligation and collective identity.</p>
+    </section>
+
+    <section class="about-sec" id="related">
+      <span class="eyebrow">Related Indian projects</span>
+      <h2>Prototype Blue DH work from India</h2>
+      <p class="prose" style="max-width:42rem">Several Indian projects place water, displacement and community memory at the centre of digital practice without calling themselves Blue DH. None uses deep mapping through IDN as its main method — the gap this project addresses.</p>
+      <div class="related">
+        <div class="card"><h3>Lost Water! Remainscape?</h3><p>Shanmugapriya T.'s eco-electronic literature work on the lost waterscapes of the Noyyal River, Coimbatore, across three generations, using interactivity, kinetic typography and archival maps.</p></div>
+        <div class="card"><h3>Oral History Narmada</h3><p>Nandini Oza's archive of testimony from the movement against the Sardar Sarovar dam, built from over twenty years of fieldwork.</p></div>
+        <div class="card"><h3>Jol Jyanto Kolkata</h3><p>An immersive exhibition by the Living Waters Museum mapping Kolkata's ponds, dighis, canals, the Adi Ganga and the East Kolkata Wetlands.</p></div>
+        <div class="card"><h3>The Southern Collective</h3><p>A collaboratory for the Northern Indian Ocean, with the Migration Diaries and the Sea Lexicon of coastal knowledge.</p></div>
+      </div>
+    </section>
+
+    <section class="about-sec prose" id="future">
+      <span class="eyebrow">Limitations &amp; next steps</span>
+      <h2>An unfinished map, on purpose</h2>
+      <p>The four layers are not equally available for every water body, and the project currently focuses on the human–water relationship while overlooking water's connections with other species — an absence the fish narrator gestures towards. The project also relies on the uneven availability of open digital sources.</p>
+      <p>Next, we will deepen the layers, add water bodies from existing and new regions, grow the lexicon of water names gathered in the team's four languages into a multilingual dictionary, and study literary and non-literary texts with computational methods.</p>
+      <div class="row" style="margin-top:1rem"><a class="btn" href="team.html">Meet the team <span data-ui-ico="next"></span></a><a class="btn ghost" href="cite.html">Cite the project</a></div>
+    </section>
+
+    <section class="about-sec" id="refs">
+      <span class="eyebrow">Selected references</span>
+      <h2>Works the project draws on</h2>
+      <ol class="refs">
+        <li>Biggs, J., S. von Fumetti, and M. Kelly-Quinn. 2017. “The Importance of Small Waterbodies for Biodiversity and Ecosystem Services.” <em>Hydrobiologia</em> 793: 3–39. <a href="https://doi.org/10.1007/s10750-016-3007-0" target="_blank" rel="noopener">doi:10.1007/s10750-016-3007-0</a></li>
+        <li>Bloom, Brett, and Nuno Sacramento. 2018. <em>Deep Mapping</em>. Breakdown Break Down Press.</li>
+        <li>Bodenhamer, David J. 2015. “Narrating Space and Place.” In <em>Deep Maps and Spatial Narratives</em>, 7–27. Indiana University Press.</li>
+        <li>Bhimjyani, Simran, Mehul Desai, and T. Shanmugapriya. 2025. “Narrating Nature in the Digital Age: Exploring Indian Eco-Electronic Literature.” <em>New Review of Hypermedia and Multimedia</em>. <a href="https://doi.org/10.1080/13614568.2025.2557808" target="_blank" rel="noopener">doi:10.1080/13614568.2025.2557808</a></li>
+        <li>Jones, Owain, and Heather Green. 2021. “Rivers—Mouths—Tides—Memories.” <em>River Research and Applications</em>. <a href="https://doi.org/10.1002/rra.3887" target="_blank" rel="noopener">doi:10.1002/rra.3887</a></li>
+        <li>Koenitz, Hartmut. 2023. <em>Understanding Interactive Digital Narrative</em>. Routledge. <a href="https://doi.org/10.4324/9781003106425" target="_blank" rel="noopener">doi:10.4324/9781003106425</a></li>
+        <li>Murray, Janet H. 1997. <em>Hamlet on the Holodeck</em>. MIT Press.</li>
+        <li>Shanmugapriya, T., and Deborah Sutton. 2022. “Electronic Literature as a Method and as a Disseminative Tool for Environmental Calamity.” <em>Electronic Book Review</em>. <a href="https://doi.org/10.7273/8fce-9302" target="_blank" rel="noopener">doi:10.7273/8fce-9302</a></li>
+        <li>Taylor, Joanna E., Christopher E. Donaldson, Ian N. Gregory, and James O. Butler. 2018. “Mapping Digitally, Mapping Deep.” <em>Literary Geographies</em> 4 (1): 10–19.</li>
+        <li>Travis, Charles. 2018. “The Digital Anthropocene, Deep Mapping, and Environmental Humanities' Big Data.” <em>Resilience</em> 5 (2): 172–188.</li>
+      </ol>
+    </section>
+  </div>
+</div>
+  </main>
+  <footer id="site-footer"></footer>
+  <script src="icons.js"></script>
+  <script src="https://unpkg.com/papaparse@5.3.2/papaparse.min.js"></script>
+  <script src="data.js"></script>
+  <script src="photos.js"></script>
+  <script src="records.js"></script>
+  <script src="sound.js"></script>
+  <script src="site.js"></script>
+  <script src="about.js"></script>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Jal Yatra · Deep Mapping of Micro Water Bodies</title>
+  <meta name="description" content="Jal Yatra — journey through India's micro water bodies by state, by water form and by layer of memory, then open them in the 3D deep map.">
+  <meta property="og:title" content="Jal Yatra · Deep Mapping of Micro Water Bodies">
+  <meta property="og:description" content="Jal Yatra — journey through India's micro water bodies by state, by water form and by layer of memory, then open them in the 3D deep map.">
+  <meta name="theme-color" content="#1f3364">
+  <script src="prefs.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Mukta:wght@300;400;500;600;700&family=Tiro+Devanagari+Hindi&family=Noto+Sans+Bengali:wght@400;600&family=Noto+Sans+Oriya:wght@400;600&family=Noto+Sans+Gujarati:wght@400;600&family=Noto+Sans+Tamil:wght@400;600&family=Noto+Sans+Ol+Chiki&display=swap">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="site.css">
+  <link rel="icon" href="logo.svg" type="image/svg+xml">
+</head>
+<body class="page" data-page="collection">
+  <header id="site-header"></header>
+  <main id="main">
+<section class="phero">
+  <div class="wrap">
+    <div>
+      <nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Home</a><span>Explore</span><span>Jal Yatra</span></nav>
+      <span class="eyebrow">Explore</span>
+      <h1>Jal Yatra</h1>
+      <div class="sub">जल यात्रा — a journey by state, by water form and by layer of memory</div>
+      <p class="lead">Travel through every water body in the deep map. Start from a state, a water form or a layer of memory; every card opens its water body in the 3D map with its four fish narrators.</p>
+    </div>
+    <div class="ripple-art" data-art="environmental"></div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="wrap">
+    <div class="atlas-cta rv">
+      <div>
+        <span class="eyebrow" style="color:#f2d48a">The 3D deep map</span>
+        <h2 style="font-family:var(--serif);font-size:clamp(1.9rem,3.6vw,2.7rem);line-height:1.08;margin:.5rem 0 .7rem">From the globe to a single kund</h2>
+        <p>Fly in from a turning globe to raised states, terrain and water-body medallions. Choose a state on this map to start there, or begin with all of India.</p>
+        <div class="row" style="margin-top:1.2rem"><a class="btn" href="map.html">Open the 3D map <span data-ui-ico="next"></span></a><a class="btn ghost" href="map.html?tour=1"><span data-ui-ico="tour"></span>Start a guided tour</a></div>
+      </div>
+      <div style="position:relative" id="indiaWrap"><div class="map-tip" id="mapTip"></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="states">
+  <div class="wrap">
+    <div class="sec-h rv"><span class="eyebrow">By state</span><h2>Eight states, five scripts</h2><p>Each team member gathered water bodies from their own region.</p></div>
+    <div class="state-cards" id="stateCards"></div>
+  </div>
+</section>
+
+<section class="sec" id="collection">
+  <div class="wrap">
+    <div class="sec-h rv"><span class="eyebrow">The collection</span><h2>Every water body, in one place</h2><p>Filter by water form or by the layer you want to read, search by name or story, and open any card in the map.</p></div>
+    <h3 class="note" style="margin:0 0 .6rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase">Water form</h3>
+    <div class="type-tiles" id="typeTiles" style="margin-bottom:1.4rem"></div>
+    <h3 class="note" style="margin:0 0 .6rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase">Layer written</h3>
+    <div class="layer-pick" id="layerPick" style="margin-bottom:1.4rem"></div>
+    <div class="coll-tools">
+      <label class="search"><span data-ui-ico="search"></span><input id="cq" type="search" placeholder="Search names, places and stories…" aria-label="Search the collection"></label>
+      <select id="cState" aria-label="Filter by state"></select>
+      <select id="cSort" aria-label="Sort"><option value="name">A–Z</option><option value="done">Most layers written</option><option value="state">By state</option></select>
+      <span class="coll-count" id="cCount" aria-live="polite"></span>
+    </div>
+    <div class="coll" id="coll"></div>
+  </div>
+</section>
+  </main>
+  <footer id="site-footer"></footer>
+  <script src="icons.js"></script>
+  <script src="https://unpkg.com/papaparse@5.3.2/papaparse.min.js"></script>
+  <script src="data.js"></script>
+  <script src="photos.js"></script>
+  <script src="records.js"></script>
+  <script src="geo-india.js"></script>
+  <script src="sound.js"></script>
+  <script src="site.js"></script>
+  <script src="explore.js"></script>
+</body>
+</html>

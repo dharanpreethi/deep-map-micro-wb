@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>State View | India Water Map</title>
+  <!-- The state view now lives inside the 3D atlas (map.html?state=…).
+       This page keeps old links and bookmarks working. -->
+  <script>
+    (function () {
+      var s = new URLSearchParams(location.search).get('state');
+      if (!s) { try { s = localStorage.getItem('selectedState'); } catch (e) { } }
+      location.replace('map.html' + (s ? '?state=' + encodeURIComponent(s) : ''));
+    })();
+  </script>
+  <style>body { background: #0b1530; color: #e8d9b5; font-family: Georgia, serif; display: grid; place-items: center; height: 100vh; margin: 0; }</style>
+</head>
+<body>
+  <noscript><a href="map.html" style="color:#e2b04a">Open the map</a></noscript>
+</body>
+</html>
