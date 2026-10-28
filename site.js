@@ -20,7 +20,7 @@
   };
   const EMAIL = 'shanmugapriya@iitism.ac.in';
   const TEAM = [
-    { id: 'shanmugapriya', name: 'Shanmugapriya T.', role: 'Lead Researcher', short: 'Assistant Professor (Digital Humanities)', photo: 'shanmugapriya.webp', url: 'https://shanmugapriya.com/', layer: 'literary' },
+    { id: 'shanmugapriya', name: 'Shanmugapriya T.', role: 'Lead Researcher | Conceptualisation and Content', short: 'Assistant Professor (Digital Humanities)', photo: 'shanmugapriya.webp', url: 'https://shanmugapriya.com/', layer: 'literary' },
     { id: 'simran', name: 'Simran Bhimjyani', role: 'Lead Researcher | Conceptualisation and Content', short: 'Doctoral Scholar, Digital Environmental Humanities', photo: 'simran.webp', url: 'https://simran174-iitism.github.io/simranbhimjyani.in/', layer: 'environmental' },
     { id: 'simanta', name: 'Simanta Nandi', role: 'Website Design & Development', short: 'MA, Digital Humanities and Social Sciences', photo: 'simanta.webp', url: 'https://about.me/simantanandi', layer: 'cultural' },
     { id: 'aditya', name: 'Aditya Kumar', role: 'Website Design & Development', short: 'MA, Digital Humanities and Social Sciences', photo: 'aditya.webp', url: 'https://www.linkedin.com/in/aditya-kumar-singh1999/', layer: 'historical' }
