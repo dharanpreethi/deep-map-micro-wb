@@ -341,7 +341,9 @@
         if (!wide.matches) { el.style.removeProperty('--py'); return; }
         const r = el.parentElement.getBoundingClientRect();
         if (r.bottom < -200 || r.top > vh + 200) return;
-        const k = Math.max(-1, Math.min(1, (r.top + r.height / 2 - vh / 2) / (vh / 2 + r.height / 2)));
+        const raw = Math.max(-1, Math.min(1, (r.top + r.height / 2 - vh / 2) / (vh / 2 + r.height / 2)));
+        // still, and perfectly in line, while the block sits in the middle of the screen; drift only on the way in and out
+        const band = Math.max(0, Math.abs(raw) - .32) / .68, k = Math.sign(raw) * band * band * (3 - 2 * band);
         const amp = +(el.dataset.pxAmp || 14);
         el.style.setProperty('--py', (k * amp * (el.dataset.px === 'down' ? -1 : 1)).toFixed(1) + 'px');
       });
@@ -351,6 +353,139 @@
     addEventListener('resize', ask);
     root.classList.add('px-on');
     run();
+  }
+
+  /* ---------------- typewriter: headings type out letter by letter, text appears word by word ----------------
+     The full text stays in the page for screen readers, search, printing and translation. The effect is
+     skipped when motion is reduced and on pages opened through Google Translate. */
+  function typewriter() {
+    if (REDUCED() || PROXY || !body.classList.contains('page') || !('IntersectionObserver' in window)) return;
+    const SKIP = '#site-header, #site-footer, nav, form, button, select, label, pre, code, kbd, .pop, .modal, .site-sheet, .crumbs, .stat-row, .marquee, .team-strip, .tags, .stack, .wbc, #grid, .cite-out, .no-tw, .hero-title, .toast, .lex-tools, .orbit, .url-list';
+    const ok = el => !el.closest(SKIP) && !el.querySelector('input, textarea, select, button') && el.textContent.trim().length > 1;
+    const heads = $$('main h1, main h2').filter(h => ok(h) && !h.querySelector('a, [tabindex]'));
+    const texts = $$('main p, main blockquote, main li, main dd, main .sub, main figcaption, main .eyebrow, main h3, main h1, main h2')
+      .filter(el => ok(el) && !heads.some(h => h.contains(el)) && !el.parentElement.closest('p, blockquote, li, dd, h3, figcaption'));
+    const textNodes = el => { const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, { acceptNode: n => n.nodeValue.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP }); const a = []; while (w.nextNode()) a.push(w.currentNode); return a; };
+
+    function prepHead(h) {
+      const clone = h.cloneNode(true);
+      clone.querySelectorAll('[id]').forEach(n => n.removeAttribute('id'));
+      textNodes(clone).forEach(t => {
+        const frag = document.createDocumentFragment();
+        t.nodeValue.split(/(\s+)/).forEach(part => {
+          if (!part) return;
+          if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); return; }
+          const w = document.createElement('span'); w.className = 'tw-word';
+          [...part].forEach(ch => { const c = document.createElement('span'); c.className = 'tw-c'; c.textContent = ch; w.appendChild(c); });
+          frag.appendChild(w);
+        });
+        t.replaceWith(frag);
+      });
+      const sr = document.createElement('span'); sr.className = 'sr-only';
+      while (h.firstChild) sr.appendChild(h.firstChild);
+      const vis = document.createElement('span'); vis.className = 'tw-vis'; vis.setAttribute('aria-hidden', 'true');
+      while (clone.firstChild) vis.appendChild(clone.firstChild);
+      h.append(sr, vis);
+      const chars = [...vis.querySelectorAll('.tw-c')];
+      const step = Math.max(16, Math.min(42, 1400 / Math.max(chars.length, 1)));
+      h._tw = { chars, step };
+      return chars.length * step;
+    }
+    function typeHead(h, delay) {
+      const { chars, step } = h._tw, caret = document.createElement('span');
+      caret.className = 'tw-caret'; caret.setAttribute('aria-hidden', 'true');
+      let k = 0;
+      setTimeout(function tick() {
+        const c = chars[k++];
+        if (!c) { setTimeout(() => { caret.classList.add('bye'); setTimeout(() => caret.remove(), 600); h.classList.add('tw-done'); }, 1200); return; }
+        c.classList.add('on'); c.after(caret);
+        // a natural rhythm: a little pause after spaces and punctuation
+        const next = chars[k], pause = next && next.parentElement !== c.parentElement ? step * 2.2 : /[,.:;]/.test(c.textContent) ? step * 4 : step;
+        setTimeout(tick, pause * (0.75 + Math.random() * 0.5));
+      }, delay);
+    }
+    function prepText(el) {
+      let i = 0;
+      textNodes(el).forEach(t => {
+        const frag = document.createDocumentFragment();
+        t.nodeValue.split(/(\s+)/).forEach(part => {
+          if (!part) return;
+          if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); return; }
+          const w = document.createElement('span'); w.className = part.length > 22 ? 'tw-w tw-long' : 'tw-w'; w.style.setProperty('--i', i++); w.textContent = part; frag.appendChild(w);
+        });
+        // inside a flex or grid box every span would become its own item, so keep the words in one run
+        if (/flex|grid/.test(getComputedStyle(t.parentNode).display)) { const run = document.createElement('span'); run.className = 'tw-run'; run.appendChild(frag); t.replaceWith(run); }
+        else t.replaceWith(frag);
+      });
+      el.style.setProperty('--step', Math.max(6, Math.min(32, 1400 / Math.max(i, 1))) + 'ms');
+      return i * Math.max(6, Math.min(32, 1400 / Math.max(i, 1)));
+    }
+
+    const all = [...new Set([...heads, ...texts])].sort((a, b) => a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1);
+    const dur = new Map();
+    all.forEach(el => { try { const h = heads.includes(el); dur.set(el, h ? prepHead(el) : prepText(el)); el.classList.add('tw', h ? 'tw-h' : 'tw-t'); } catch (e) { /* leave this element as it is */ } });
+    root.classList.add('tw-on');
+
+    // elements that come into view together play one after another, top to bottom
+    let queue = [], timer = null;
+    const flush = () => {
+      timer = null; let t = 0;
+      queue.sort((a, b) => a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1).forEach(el => {
+        const d = dur.get(el) || 0;
+        el.style.setProperty('--delay', t + 'ms'); el.classList.add('tw-go');
+        if (el.classList.contains('tw-h') && el._tw) typeHead(el, t);
+        else setTimeout(() => el.classList.add('tw-done'), t + d + 900);
+        t += el.classList.contains('tw-h') ? Math.min(d * .7, 900) : Math.min(d * .3, 420);
+      });
+      queue = [];
+    };
+    const io = new IntersectionObserver(es => es.forEach(en => {
+      if (!en.isIntersecting) return;
+      io.unobserve(en.target); queue.push(en.target);
+      if (!timer) timer = setTimeout(flush, 60);
+    }), { rootMargin: '0px 0px -6% 0px' });
+    all.forEach(el => el.classList.contains('tw') && io.observe(el));
+    addEventListener('beforeprint', () => all.forEach(el => { el.classList.add('tw-go', 'tw-done'); (el._tw ? el._tw.chars : []).forEach(c => c.classList.add('on')); }));
+  }
+
+  /* ---------------- flourishes: a water-line scroll gauge, filling numerals, drawn rules,
+     rising image reveals, tilting cards and hero art that follows the pointer ---------------- */
+  function flourishes() {
+    if (REDUCED() || !body.classList.contains('page')) return;
+    root.classList.add('fx-on');
+    // 1. scroll gauge: a thin water line that fills as you read
+    const gauge = document.createElement('div'); gauge.className = 'flow-gauge'; gauge.setAttribute('aria-hidden', 'true'); gauge.innerHTML = '<i></i>';
+    body.appendChild(gauge);
+    let q = false;
+    const fill = () => { q = false; const h = document.documentElement.scrollHeight - innerHeight; gauge.style.setProperty('--p', h > 0 ? Math.min(1, scrollY / h) : 0); };
+    addEventListener('scroll', () => { if (!q) { q = true; requestAnimationFrame(fill); } }, { passive: true }); fill();
+    // 2–4. eyebrow rules draw in, outline numerals fill with water, pictures rise into view
+    if ('IntersectionObserver' in window) {
+      const seen = $$('main .eyebrow, main .ab-num, .shot img, .anno-wrap, .portrait .frame, .lg-card .fish, .layer-card .fish');
+      const io = new IntersectionObserver(es => es.forEach(en => { if (en.isIntersecting) { en.target.classList.add('seen'); io.unobserve(en.target); } }), { rootMargin: '0px 0px -8% 0px' });
+      seen.forEach(el => { const r = el.getBoundingClientRect(); el.classList.add('fx'); if (r.top < innerHeight * .92 && r.bottom > 0) requestAnimationFrame(() => setTimeout(() => el.classList.add('seen'), 250)); else io.observe(el); });
+    }
+    // 5. cards lean gently towards the pointer, with a soft light where it rests
+    if (matchMedia('(hover: hover) and (pointer: fine)').matches) {
+      $$('.card.lift, .lg-card, .m-card, .man-quick li, .how, .deed-col, .tool-card, .wbc').forEach(c => {
+        if (getComputedStyle(c).position === 'static') c.style.position = 'relative';
+        const sheen = document.createElement('span'); sheen.className = 'sheen'; sheen.setAttribute('aria-hidden', 'true'); c.appendChild(sheen);
+        c.classList.add('tilt'); c.parentElement.style.perspective = '1100px';
+        c.addEventListener('pointermove', e => {
+          const r = c.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5;
+          const mag = Math.min(1, Math.hypot(x, y) * 1.6), deg = (c.offsetWidth > 520 ? 2.2 : 4) * mag;
+          c.style.setProperty('--tilt', `${(-y).toFixed(3)} ${x.toFixed(3)} 0 ${deg.toFixed(2)}deg`);
+          c.style.setProperty('--mx', ((x + .5) * 100).toFixed(1) + '%'); c.style.setProperty('--my', ((y + .5) * 100).toFixed(1) + '%');
+        });
+        c.addEventListener('pointerleave', () => { c.style.removeProperty('--tilt'); });
+      });
+      // 6. the page-header art drifts towards the pointer
+      const art = $$('.ripple-art, #mandala');
+      if (art.length) addEventListener('pointermove', e => {
+        const x = e.clientX / innerWidth - .5, y = e.clientY / innerHeight - .5;
+        art.forEach(a => a.style.setProperty('--fx', `${(x * 16).toFixed(1)}px ${(y * 12).toFixed(1)}px`));
+      }, { passive: true });
+    }
   }
 
   /* ---------------- a drop-like ripple on buttons and cards (content pages only) ---------------- */
@@ -422,7 +557,7 @@
   paintLang(curLang());
   mountSound();
   welcome();
-  const ready = () => { zigzag(); reveals(); parallax(); drips(); };
+  const ready = () => { zigzag(); reveals(); typewriter(); parallax(); flourishes(); drips(); };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ready); else ready();
   $$('[data-copy]').forEach(b => b.addEventListener('click', () => copyText(b.dataset.copy || $(b.dataset.copyFrom).innerText, b)));
 
