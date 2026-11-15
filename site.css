@@ -628,24 +628,6 @@ a.fn:hover { color: var(--terracotta); }
 .jy-en { font-family: var(--sans); font-size: .82em; color: var(--ink-2); }
 [data-ui="dark"] .jy-names { color: var(--gold-2); }
 
-/* ---------- typewriter text ---------- */
-.tw-on .tw-h .tw-word { display: inline-block; white-space: nowrap; }
-.tw-on .tw-h .tw-c { opacity: 0; }
-.tw-on .tw-h.tw-go .tw-c { animation: twType .01s steps(1) forwards; animation-delay: calc(var(--delay, 0ms) + var(--i) * var(--step, 30ms)); }
-.tw-on .tw-h .tw-caret { display: inline-block; width: .08em; height: .9em; margin-left: .06em; vertical-align: -.08em; background: var(--terracotta); opacity: 0; }
-.tw-on .tw-h.tw-go .tw-caret { animation: twCaret .9s steps(1) var(--delay, 0ms) 4 both; }
-.tw-on .tw-h.tw-done .tw-caret { display: none; }
-.tw-on .tw-t .tw-w { opacity: 0; filter: blur(3px); }
-.tw-on .tw-t.tw-go .tw-w { animation: twWord .55s var(--ease) forwards; animation-delay: calc(var(--delay, 0ms) + var(--i) * var(--step, 20ms)); }
-.tw-on .tw.tw-done .tw-c, .tw-on .tw.tw-done .tw-w { opacity: 1; filter: none; transform: none; animation: none; }
-.paradox .tw-h .tw-caret, .deed-card .tw-caret, .outcome .tw-caret { background: #f2d48a; }
-[data-ui="dark"] .tw-on .tw-h .tw-caret { background: var(--gold-2); }
-@keyframes twType { to { opacity: 1; } }
-@keyframes twWord { from { opacity: 0; filter: blur(3px); transform: translateY(.25em); } to { opacity: 1; filter: none; transform: none; } }
-@keyframes twCaret { 0% { opacity: 1; } 50% { opacity: 0; } 100% { opacity: 1; } }
-.tw-w { display: inline-block; }
-.tw-w.tw-long, .dropcap .tw-w, .deed-meta .tw-w { display: inline; }
-@media print { .tw-c, .tw-w { opacity: 1 !important; filter: none !important; animation: none !important; } }
 
 /* ---------- micro water effects (content pages only, never the map) ----------
    1. Text links: the underline turns into a small flowing wave on hover.
@@ -670,8 +652,8 @@ a.fn:hover { color: var(--terracotta); }
 .page .nav-a::before { content: ""; position: absolute; left: .85rem; right: .85rem; bottom: .12rem; height: 6px; background: var(--wave-gold) 0 0 / 18px 6px repeat-x; opacity: 0; transform: scaleX(.3); transition: opacity .25s, transform .35s var(--ease); pointer-events: none; }
 .page .nav-a:hover::before, .page .nav-a:focus-visible::before { opacity: 1; transform: none; animation: wvFlow .9s linear infinite; }
 .page .nav-a.cur:hover::after, .page .cur-group > .nav-a:hover::after { opacity: 0; }
-.drip { position: absolute; left: var(--x); top: var(--y); width: var(--d); height: var(--d); margin: calc(var(--d) / -2) 0 0 calc(var(--d) / -2); border-radius: 50%; pointer-events: none; border: 2px solid currentColor; opacity: .5; transform: scale(0); animation: drip .75s cubic-bezier(.2, .7, .3, 1) forwards; z-index: 0; }
-.drip + .drip { animation-delay: .12s; }
+.drip { position: absolute; left: var(--x); top: var(--y); width: var(--d); height: var(--d); margin: calc(var(--d) / -2) 0 0 calc(var(--d) / -2); border-radius: 50%; pointer-events: none; border: 2px solid currentColor; background: radial-gradient(circle, transparent 55%, color-mix(in srgb, currentColor 22%, transparent) 70%, transparent 72%); opacity: .7; transform: scale(.05); animation: drip .8s cubic-bezier(.2, .7, .3, 1) forwards; z-index: 0; }
+.drip + .drip { animation-delay: .16s; width: calc(var(--d) * .6); height: calc(var(--d) * .6); margin: calc(var(--d) * -.3) 0 0 calc(var(--d) * -.3); }
 @keyframes drip { to { transform: scale(1); opacity: 0; } }
 html[data-motion="1"] .page a, html[data-motion="1"] .page .nav-a::before { animation: none !important; }
 @media (prefers-reduced-motion: reduce) { .page a, .page .nav-a::before { animation: none !important; } .drip { display: none; } }
@@ -769,3 +751,30 @@ html[data-motion="1"] .page a, html[data-motion="1"] .page .nav-a::before { anim
 }
 @media (max-width: 520px) { .man-quick { grid-template-columns: 1fr; } .anno .pin { width: 1.6rem; height: 1.6rem; font-size: .8rem; } }
 html[data-motion="1"] .anno .pin { animation: none; }
+
+/* ---------- motion: zigzag reveals, opposing parallax, overlapping layouts ---------- */
+.rv.pre.zz-l:not(.in) { transform: translateX(-2.2rem); }
+.rv.pre.zz-r:not(.in) { transform: translateX(2.2rem); }
+.px-on [data-px] { translate: 0 var(--py, 0px); transition: translate .35s cubic-bezier(.2, .7, .3, 1); will-change: translate; }
+@media (min-width: 900px) {
+  /* home: the pull quote sits on a second, offset frame */
+  .ov-quote { position: relative; isolation: isolate; }
+  .ov-quote::before { content: ""; position: absolute; inset: 1.1rem -1.1rem -1.1rem 1.1rem; border: 1px solid var(--gold); border-radius: 0 1.2rem 1.2rem 0; z-index: -1; opacity: .7; }
+  /* about: the quote rises beside the heading, the outcome overlaps both method cards */
+  .ab-pull { margin-top: -6.2rem; z-index: 2; box-shadow: 0 24px 40px -30px rgba(43, 30, 20, .55); }
+  .method-pair .m-card { padding-bottom: 3.4rem; }
+  .outcome { position: relative; z-index: 2; margin: -2.4rem 2.6rem 0; box-shadow: 0 26px 46px -28px rgba(18, 32, 74, .85); }
+  .ab-build .tech { margin-top: 2.4rem; }
+  /* licence: the two term columns overlap the foot of the deed card */
+  .deed-card { padding-bottom: calc(clamp(1.4rem, 4vw, 2.4rem) + 2.6rem); }
+  .deed-grid.ov-up { position: relative; z-index: 2; margin: -3rem 1.6rem 0; }
+  .deed-grid.ov-up .deed-col { box-shadow: 0 24px 44px -30px rgba(18, 32, 74, .6); }
+  /* manual: captions overlap the foot of their screenshot */
+  .man-two .shot figcaption, .pair .shot figcaption { position: relative; z-index: 1; display: inline-block; margin: -1.6rem 0 0 1rem; padding: .45rem .8rem; border-radius: .7rem; background: var(--paper); border: 1px solid var(--line); box-shadow: 0 12px 24px -16px rgba(18, 32, 74, .6); color: var(--ink-2); }
+  .man-two.flip > :first-child { order: 2; }
+}
+@media (min-width: 1100px) {
+  /* team: each portrait breaks out over the edge of its card, on alternate sides */
+  .member .portrait { margin-left: -3.4rem; }
+  .member:nth-child(even) .portrait { margin-left: 0; margin-right: -3.4rem; }
+}

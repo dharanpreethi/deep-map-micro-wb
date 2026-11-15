@@ -318,85 +318,39 @@
     addEventListener('beforeprint', () => els.forEach(e => e.classList.add('in')));
   }
 
-  /* ---------------- typewriter: headings type out letter by letter, text appears word by word ----------------
-     Text stays in the page for screen readers, search, printing and translation. The effect is skipped
-     when motion is reduced, on translated pages and on the map. */
-  function typewriter() {
-    if (REDUCED() || PROXY || !body.classList.contains('page') || !('IntersectionObserver' in window)) return;
-    const SKIP = '#site-header, #site-footer, nav, form, button, select, label, pre, code, .pop, .modal, .site-sheet, .welcome, .crumbs, .stat-row, .marquee, .team-strip, .tags, .stack, .wbc, #grid, .cite-out, .no-tw, .hero-title, .toast, .lex-tools, .orbit';
-    const ok = el => !el.closest(SKIP) && !el.querySelector('input, textarea, select, button') && el.textContent.trim().length > 1;
-    const heads = $$('main h1, main h2').filter(h => ok(h) && !h.querySelector('a, [tabindex]'));
-    const texts = $$('main p, main blockquote, main li, main dd, main .sub, main figcaption, main .eyebrow, main h3, main h1, main h2').filter(el => ok(el) && !heads.some(h => h.contains(el)) && !el.parentElement.closest('p, blockquote, li, dd, h3, figcaption'));
-    const textNodes = el => { const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, { acceptNode: n => n.nodeValue.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP }); const a = []; while (w.nextNode()) a.push(w.currentNode); return a; };
-
-    function prepHead(h) {
-      const clone = h.cloneNode(true);
-      clone.querySelectorAll('[id]').forEach(n => n.removeAttribute('id'));
-      let i = 0;
-      textNodes(clone).forEach(t => {
-        const frag = document.createDocumentFragment();
-        t.nodeValue.split(/(\s+)/).forEach(part => {
-          if (!part) return;
-          if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); return; }
-          const w = document.createElement('span'); w.className = 'tw-word';
-          [...part].forEach(ch => { const c = document.createElement('span'); c.className = 'tw-c'; c.style.setProperty('--i', i++); c.textContent = ch; w.appendChild(c); });
-          frag.appendChild(w);
-        });
-        t.replaceWith(frag);
+  /* ---------------- motion: zigzag reveals and opposing scroll parallax (content pages only) ----------------
+     [data-zz]      children slide in from alternate sides (left, right, left…) as they reach the screen
+     [data-px]      "up" or "down": drifts against the scroll, so neighbours move in opposite directions
+     [data-px-alt]  its children alternate up and down
+     Parallax runs only on wide screens; everything is still when motion is reduced. */
+  function zigzag() {
+    if (!body.classList.contains('page')) return;
+    $$('[data-zz]').forEach(box => [...box.children].forEach((c, i) => c.classList.add('rv', i % 2 ? 'zz-r' : 'zz-l')));
+  }
+  function parallax() {
+    if (REDUCED() || !body.classList.contains('page')) return;
+    $$('[data-px-alt]').forEach(box => [...box.children].forEach((c, i) => { if (!c.dataset.px) c.dataset.px = i % 2 ? 'down' : 'up'; }));
+    const els = $$('[data-px]');
+    if (!els.length) return;
+    const wide = matchMedia('(min-width: 900px)');
+    let queued = false;
+    const run = () => {
+      queued = false;
+      const vh = innerHeight;
+      els.forEach(el => {
+        if (!wide.matches) { el.style.removeProperty('--py'); return; }
+        const r = el.parentElement.getBoundingClientRect();
+        if (r.bottom < -200 || r.top > vh + 200) return;
+        const k = Math.max(-1, Math.min(1, (r.top + r.height / 2 - vh / 2) / (vh / 2 + r.height / 2)));
+        const amp = +(el.dataset.pxAmp || 14);
+        el.style.setProperty('--py', (k * amp * (el.dataset.px === 'down' ? -1 : 1)).toFixed(1) + 'px');
       });
-      const sr = document.createElement('span'); sr.className = 'sr-only';
-      while (h.firstChild) sr.appendChild(h.firstChild);
-      const vis = document.createElement('span'); vis.className = 'tw-vis'; vis.setAttribute('aria-hidden', 'true');
-      while (clone.firstChild) vis.appendChild(clone.firstChild);
-      const caret = document.createElement('span'); caret.className = 'tw-caret'; vis.appendChild(caret);
-      h.append(sr, vis);
-      const step = Math.max(14, Math.min(38, 1300 / Math.max(i, 1)));
-      h.style.setProperty('--step', step + 'ms');
-      return i * step;
-    }
-    function prepText(el) {
-      let i = 0;
-      textNodes(el).forEach(t => {
-        const frag = document.createDocumentFragment();
-        t.nodeValue.split(/(\s+)/).forEach(part => {
-          if (!part) return;
-          if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); return; }
-          const w = document.createElement('span'); w.className = part.length > 22 ? 'tw-w tw-long' : 'tw-w'; w.style.setProperty('--i', i++); w.textContent = part; frag.appendChild(w);
-        });
-        // inside a flex or grid box every span would become its own item, so keep the words in one run
-        const pd = getComputedStyle(t.parentNode).display;
-        if (/flex|grid/.test(pd)) { const run = document.createElement('span'); run.className = 'tw-run'; run.appendChild(frag); t.replaceWith(run); }
-        else t.replaceWith(frag);
-      });
-      const step = Math.max(6, Math.min(34, 1500 / Math.max(i, 1)));
-      el.style.setProperty('--step', step + 'ms');
-      return i * step;
-    }
-
-    const all = [...new Set([...heads, ...texts])].sort((a, b) => a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1);
-    const dur = new Map();
-    all.forEach(el => { try { dur.set(el, heads.includes(el) ? prepHead(el) : prepText(el)); el.classList.add('tw', heads.includes(el) ? 'tw-h' : 'tw-t'); } catch (e) { /* leave this element as it is */ } });
-    root.classList.add('tw-on');
-
-    // elements that enter the view together play one after another, top to bottom
-    let queue = [], timer = null;
-    const flush = () => {
-      timer = null; let t = 0;
-      queue.sort((a, b) => a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1).forEach(el => {
-        el.style.setProperty('--delay', t + 'ms'); el.classList.add('tw-go');
-        const d = dur.get(el) || 0;
-        t += el.classList.contains('tw-h') ? Math.min(d * .75, 900) : Math.min(d * .35, 500);
-        setTimeout(() => el.classList.add('tw-done'), t + d + 900);
-      });
-      queue = [];
     };
-    const io = new IntersectionObserver(es => es.forEach(en => {
-      if (!en.isIntersecting) return;
-      io.unobserve(en.target); queue.push(en.target);
-      if (!timer) timer = setTimeout(flush, 60);
-    }), { rootMargin: '0px 0px -6% 0px' });
-    all.forEach(el => el.classList.contains('tw') && io.observe(el));
-    addEventListener('beforeprint', () => all.forEach(el => el.classList.add('tw-go', 'tw-done')));
+    const ask = () => { if (!queued) { queued = true; requestAnimationFrame(run); } };
+    addEventListener('scroll', ask, { passive: true });
+    addEventListener('resize', ask);
+    root.classList.add('px-on');
+    run();
   }
 
   /* ---------------- a drop-like ripple on buttons and cards (content pages only) ---------------- */
@@ -406,7 +360,7 @@
       if (REDUCED()) return;
       const el = e.target.closest('.btn, .card.lift, .chip, .wbc');
       if (!el) return;
-      const r = el.getBoundingClientRect(), d = Math.max(r.width, r.height) * 2.2;
+      const r = el.getBoundingClientRect(), d = Math.min(Math.max(r.width, r.height) * 1.3, 420);
       if (getComputedStyle(el).position === 'static') el.style.position = 'relative';
       if (getComputedStyle(el).overflow !== 'hidden') el.style.overflow = 'hidden';
       [0, 1].forEach(() => {
@@ -468,7 +422,7 @@
   paintLang(curLang());
   mountSound();
   welcome();
-  const ready = () => { reveals(); typewriter(); drips(); };
+  const ready = () => { zigzag(); reveals(); parallax(); drips(); };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ready); else ready();
   $$('[data-copy]').forEach(b => b.addEventListener('click', () => copyText(b.dataset.copy || $(b.dataset.copyFrom).innerText, b)));
 
