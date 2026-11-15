@@ -31,12 +31,13 @@
   const NAV = [
     { id: 'home', label: 'Home', href: 'index.html' },
     { id: 'project', label: 'Project & About', children: [
-      { id: 'about', label: 'About the Project', href: 'about.html', icon: 'info', desc: 'Brief, objectives, method and findings' },
+      { id: 'about', label: 'About the Project', href: 'about.html', icon: 'info', desc: 'Brief, method, fish narrators and open tools' },
       { id: 'team', label: 'Our Team', href: 'team.html', icon: 'team', desc: 'The four researchers behind the map' }
     ] },
     { id: 'explore', label: 'Explore', children: [
       { id: 'collection', label: 'Jal Yatra', href: 'explore.html', icon: 'tour', desc: 'Journey through every water body by state, form and layer' },
-      { id: 'lexicon', label: 'Lexicon', href: 'lexicon.html', icon: 'lexicon', desc: 'India’s vocabulary of water' }
+      { id: 'lexicon', label: 'Lexicon', href: 'lexicon.html', icon: 'lexicon', desc: 'India’s vocabulary of water' },
+      { id: 'manual', label: 'User Manual', href: 'user-manual.html', icon: 'book', desc: 'How to use the 3D map, step by step' }
     ] },
     { id: 'gov', label: 'Governance & Contact', children: [
       { id: 'licensing', label: 'Licensing & Credits', href: 'licensing.html', icon: 'cc', desc: 'CC BY-NC 4.0, sources and credits' },
@@ -317,6 +318,105 @@
     addEventListener('beforeprint', () => els.forEach(e => e.classList.add('in')));
   }
 
+  /* ---------------- typewriter: headings type out letter by letter, text appears word by word ----------------
+     Text stays in the page for screen readers, search, printing and translation. The effect is skipped
+     when motion is reduced, on translated pages and on the map. */
+  function typewriter() {
+    if (REDUCED() || PROXY || !body.classList.contains('page') || !('IntersectionObserver' in window)) return;
+    const SKIP = '#site-header, #site-footer, nav, form, button, select, label, pre, code, .pop, .modal, .site-sheet, .welcome, .crumbs, .stat-row, .marquee, .team-strip, .tags, .stack, .wbc, #grid, .cite-out, .no-tw, .hero-title, .toast, .lex-tools, .orbit';
+    const ok = el => !el.closest(SKIP) && !el.querySelector('input, textarea, select, button') && el.textContent.trim().length > 1;
+    const heads = $$('main h1, main h2').filter(h => ok(h) && !h.querySelector('a, [tabindex]'));
+    const texts = $$('main p, main blockquote, main li, main dd, main .sub, main figcaption, main .eyebrow, main h3, main h1, main h2').filter(el => ok(el) && !heads.some(h => h.contains(el)) && !el.parentElement.closest('p, blockquote, li, dd, h3, figcaption'));
+    const textNodes = el => { const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, { acceptNode: n => n.nodeValue.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP }); const a = []; while (w.nextNode()) a.push(w.currentNode); return a; };
+
+    function prepHead(h) {
+      const clone = h.cloneNode(true);
+      clone.querySelectorAll('[id]').forEach(n => n.removeAttribute('id'));
+      let i = 0;
+      textNodes(clone).forEach(t => {
+        const frag = document.createDocumentFragment();
+        t.nodeValue.split(/(\s+)/).forEach(part => {
+          if (!part) return;
+          if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); return; }
+          const w = document.createElement('span'); w.className = 'tw-word';
+          [...part].forEach(ch => { const c = document.createElement('span'); c.className = 'tw-c'; c.style.setProperty('--i', i++); c.textContent = ch; w.appendChild(c); });
+          frag.appendChild(w);
+        });
+        t.replaceWith(frag);
+      });
+      const sr = document.createElement('span'); sr.className = 'sr-only';
+      while (h.firstChild) sr.appendChild(h.firstChild);
+      const vis = document.createElement('span'); vis.className = 'tw-vis'; vis.setAttribute('aria-hidden', 'true');
+      while (clone.firstChild) vis.appendChild(clone.firstChild);
+      const caret = document.createElement('span'); caret.className = 'tw-caret'; vis.appendChild(caret);
+      h.append(sr, vis);
+      const step = Math.max(14, Math.min(38, 1300 / Math.max(i, 1)));
+      h.style.setProperty('--step', step + 'ms');
+      return i * step;
+    }
+    function prepText(el) {
+      let i = 0;
+      textNodes(el).forEach(t => {
+        const frag = document.createDocumentFragment();
+        t.nodeValue.split(/(\s+)/).forEach(part => {
+          if (!part) return;
+          if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); return; }
+          const w = document.createElement('span'); w.className = part.length > 22 ? 'tw-w tw-long' : 'tw-w'; w.style.setProperty('--i', i++); w.textContent = part; frag.appendChild(w);
+        });
+        // inside a flex or grid box every span would become its own item, so keep the words in one run
+        const pd = getComputedStyle(t.parentNode).display;
+        if (/flex|grid/.test(pd)) { const run = document.createElement('span'); run.className = 'tw-run'; run.appendChild(frag); t.replaceWith(run); }
+        else t.replaceWith(frag);
+      });
+      const step = Math.max(6, Math.min(34, 1500 / Math.max(i, 1)));
+      el.style.setProperty('--step', step + 'ms');
+      return i * step;
+    }
+
+    const all = [...new Set([...heads, ...texts])].sort((a, b) => a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1);
+    const dur = new Map();
+    all.forEach(el => { try { dur.set(el, heads.includes(el) ? prepHead(el) : prepText(el)); el.classList.add('tw', heads.includes(el) ? 'tw-h' : 'tw-t'); } catch (e) { /* leave this element as it is */ } });
+    root.classList.add('tw-on');
+
+    // elements that enter the view together play one after another, top to bottom
+    let queue = [], timer = null;
+    const flush = () => {
+      timer = null; let t = 0;
+      queue.sort((a, b) => a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1).forEach(el => {
+        el.style.setProperty('--delay', t + 'ms'); el.classList.add('tw-go');
+        const d = dur.get(el) || 0;
+        t += el.classList.contains('tw-h') ? Math.min(d * .75, 900) : Math.min(d * .35, 500);
+        setTimeout(() => el.classList.add('tw-done'), t + d + 900);
+      });
+      queue = [];
+    };
+    const io = new IntersectionObserver(es => es.forEach(en => {
+      if (!en.isIntersecting) return;
+      io.unobserve(en.target); queue.push(en.target);
+      if (!timer) timer = setTimeout(flush, 60);
+    }), { rootMargin: '0px 0px -6% 0px' });
+    all.forEach(el => el.classList.contains('tw') && io.observe(el));
+    addEventListener('beforeprint', () => all.forEach(el => el.classList.add('tw-go', 'tw-done')));
+  }
+
+  /* ---------------- a drop-like ripple on buttons and cards (content pages only) ---------------- */
+  function drips() {
+    if (!body.classList.contains('page')) return;
+    document.addEventListener('pointerdown', e => {
+      if (REDUCED()) return;
+      const el = e.target.closest('.btn, .card.lift, .chip, .wbc');
+      if (!el) return;
+      const r = el.getBoundingClientRect(), d = Math.max(r.width, r.height) * 2.2;
+      if (getComputedStyle(el).position === 'static') el.style.position = 'relative';
+      if (getComputedStyle(el).overflow !== 'hidden') el.style.overflow = 'hidden';
+      [0, 1].forEach(() => {
+        const s = document.createElement('span'); s.className = 'drip'; s.setAttribute('aria-hidden', 'true');
+        s.style.cssText = `--x:${e.clientX - r.left}px;--y:${e.clientY - r.top}px;--d:${d}px`;
+        el.appendChild(s); setTimeout(() => s.remove(), 1000);
+      });
+    }, { passive: true });
+  }
+
   /* ---------------- copy helper used by cite/contact ---------------- */
   function copyText(text, btn) {
     const done = () => { if (btn) { const o = btn.innerHTML; btn.classList.add('ok'); btn.innerHTML = I.ui('check') + 'Copied'; setTimeout(() => { btn.classList.remove('ok'); btn.innerHTML = o; }, 1800); } toast('Copied to clipboard'); };
@@ -364,11 +464,12 @@
   mountHeader(); mountFooter();
   document.addEventListener('click', e => { const b = e.target.closest('[data-pop]'); if (b) { e.stopPropagation(); togglePop(b.dataset.pop, b); } });
   paintA11y(); loadReadableFont();
-  $$('.deva').forEach(n => n.classList.add('notranslate'));
+  $$('.deva, .beng').forEach(n => n.classList.add('notranslate'));
   paintLang(curLang());
   mountSound();
   welcome();
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', reveals); else reveals();
+  const ready = () => { reveals(); typewriter(); drips(); };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ready); else ready();
   $$('[data-copy]').forEach(b => b.addEventListener('click', () => copyText(b.dataset.copy || $(b.dataset.copyFrom).innerText, b)));
 
   window.DM_SITE = { originalURL, PROXY, openMenu, closeMenu, toast, copyText, togglePop, closePops, prefs, setLang, EMAIL, NAV, TEAM };

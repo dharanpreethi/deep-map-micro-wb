@@ -129,7 +129,7 @@ body.atlas { overflow: hidden; background: #0b1530; }
 
 /* ---------- Rails ---------- */
 .rail { position: fixed; z-index: 20; display: flex; flex-direction: column; gap: 6px; padding: 6px; }
-.rail-left { left: 16px; top: 122px; animation: slideRight .8s var(--ease) both .45s; }
+.rail-left { left: 16px; top: 16px; animation: slideRight .8s var(--ease) both .45s; }
 .rail-right { right: 16px; top: 16px; animation: slideLeft .8s var(--ease) both .45s; transition: right .55s var(--ease); }
 .folio-open .rail-right { right: 472px; }
 .folio-open .pop { right: 532px; }
@@ -519,7 +519,7 @@ body.atlas { overflow: hidden; background: #0b1530; }
   .folio-head h2 { font-size: 27px; }
   .ltab .fish-badge { width: 54px; height: 54px; }
   .narrator .fish { width: 96px; }
-  .state-card { top: 64px; padding: 8px 10px 8px 8px; }
+  .state-card { top: 10px; padding: 8px 10px 8px 8px; }
   .state-card .tcounts { display: none; }
   .folio-open .state-card, .suchi-open .state-card { transform: translate(-50%, -220%); }
   .tour { bottom: 70px; }
@@ -634,3 +634,18 @@ html[data-links="1"] a { text-decoration: underline !important; text-underline-o
 .site-sheet nav a .ui-ico { color: var(--terracotta); }
 .site-sheet nav a:hover, .site-sheet nav a.cur { background: var(--line-2); }
 .ss-foot { margin: 18px 6px 0; font-size: 12px; color: var(--ink-3); }
+
+/* ---------- 3D / 2D view switch ---------- */
+.view-btn .vb-txt { font-family: var(--sans); font-weight: 700; font-size: 15px; letter-spacing: .03em; line-height: 1; }
+.view-btn[aria-pressed="false"] { background: var(--paper); color: var(--ink); }
+.view-btn[aria-pressed="false"] .vb-txt { color: var(--terracotta); }
+.vseg { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 14px; }
+.vseg button { display: grid; gap: 2px; text-align: left; padding: 8px 10px; border-radius: 12px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); cursor: pointer; transition: .2s; }
+.vseg button b { font-family: var(--serif); font-size: 18px; line-height: 1; }
+.vseg button span { font-size: 11.5px; color: var(--ink-3); line-height: 1.25; }
+.vseg button[aria-pressed="true"] { border-color: var(--terracotta); box-shadow: inset 0 0 0 1px var(--terracotta); background: var(--line-2); color: var(--ink); }
+.vseg button[aria-pressed="true"] b { color: var(--terracotta); }
+[data-ui="dark"] .vseg button[aria-pressed="true"] b { color: var(--gold-2); }
+[data-ui="dark"] .vseg button[aria-pressed="true"] { border-color: var(--gold-2); box-shadow: inset 0 0 0 1px var(--gold-2); }
+.help-more { margin: 14px 0 0; font-size: 14px; }
+.help-more a { font-weight: 600; }

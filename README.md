@@ -7,12 +7,12 @@ Department of Humanities and Social Sciences, IIT (ISM) Dhanbad.
 
 ## Publish on GitHub Pages
 
-All 86 files sit at the top level, with no folders, so the whole site uploads in one go.
+All the files sit at the top level, with no folders, so the whole site uploads in one go.
 
 1. Open the repository on github.com and click **Add file → Upload files**.
-2. Select all 86 files (Ctrl+A or Cmd+A) and drag them in. Files with the same name are replaced.
+2. Select all the files (Ctrl+A or Cmd+A) and drag them in. Files with the same name are replaced.
 3. Click **Commit changes**. In **Settings → Pages**, the source should be **Deploy from a branch**, `main`, `/ (root)`.
-4. After a minute or two the site is live, for example at `https://simantadh.github.io/DHBH/`.
+4. After a minute or two the site is live at `https://dharanpreethi.github.io/deep-map-micro-wb/`.
 
 There is no build step, no server and no API key. `404.html` is shown for broken links automatically.
 
@@ -25,7 +25,8 @@ There is no build step, no server and no API key. `404.html` is shown for broken
 | | Our Team | `team.html` |
 | Explore | Jal Yatra — browse every water body | `explore.html` |
 | | Lexicon | `lexicon.html` |
-| (from Home and Jal Yatra) | The 3D deep map | `map.html` (`?state=Bihar`, `?wb=39` and `?tour=1` open a state, a water body or the guided tour) |
+| | User Manual: an illustrated guide to the map | `user-manual.html` |
+| (from Home and Jal Yatra) | The 3D deep map | `map.html` (`?state=Bihar`, `?wb=39`, `?tour=1` and `?view=2d` open a state, a water body, the guided tour or the flat map) |
 | Governance & Contact | Licensing & Credits | `licensing.html` |
 | | FAQ | `faq.html` |
 | | Cite This Project | `cite.html` |
@@ -46,11 +47,12 @@ sound.js                    the six soundscapes, synthesised in the browser
 app.js                      the 3D map
 photos.js                   which photograph belongs to which water body (by id)
 records.js                  reads data.js for the content pages
-home.js, about.js, explore.js, cite.js, faq.js, lexicon.js   page scripts
+home.js, about.js, explore.js, cite.js, faq.js, lexicon.js, manual.js   page scripts
 geo-india.js                India state boundaries
 basemaps.js                 the two hand-tinted vector map styles
 *.webp                      water body photographs (named after the place) and team portraits
 thumbs.webp                 all card thumbnails in one image sheet
+man-*.webp                  screenshots used on the User Manual page
 logo.svg                    favicon
 ```
 
@@ -78,6 +80,10 @@ Every page has: text size from 90% to 140%; light, dark or automatic appearance;
 ## Size
 
 The whole site is about 4 MB. A first visit to the home page transfers roughly 300 KB plus fonts, and photographs load only when they come into view. Soundscapes are generated in code, so there are no audio files.
+
+## Map and sound defaults
+
+The map always opens in 3D with relief switched on; the 3D / 2D button on the right toolbar (or `?view=2d`) gives a flat map. Sound is off on every new visit. Once a visitor switches it on, it stays on until they close the tab.
 
 ## Credits and licence
 

@@ -34,15 +34,7 @@
     </div>
   </div>
 
-  <!-- title cartouche -->
-  <a class="cartouche paper gilt" href="index.html" title="Back to the project home">
-    <span id="logoSlot"></span>
-    <span>
-      <span class="eyebrow">A blue humanities deep map</span>
-      <h1>Deep Mapping of Micro Water Bodies</h1>
-      <span class="tag">जल · स्मृति · मानचित्र — water · memory · map</span>
-    </span>
-  </a>
+  <h1 class="sr-only">Deep Mapping of Micro Water Bodies: the 3D map</h1>
 
   <!-- left rail -->
   <nav class="rail rail-left paper" aria-label="Atlas navigation">
@@ -64,7 +56,7 @@
     <button class="rbtn" data-act="zin"><span data-ico="plus"></span><span class="tip">Zoom in</span></button>
     <button class="rbtn" data-act="zout"><span data-ico="minus"></span><span class="tip">Zoom out</span></button>
     <div class="sep"></div>
-    <button class="rbtn" data-act="tilt" aria-pressed="true"><span data-ico="tilt"></span><span class="tip">3D tilt</span></button>
+    <button class="rbtn view-btn" data-act="view" aria-pressed="true" aria-label="Map view: 3D. Switch to the 2D map"><span class="vb-txt" id="viewTxt">3D</span><span class="tip" id="viewTip">3D view · switch to 2D</span></button>
     <button class="rbtn" data-act="terrain" aria-pressed="true"><span data-ico="terrain"></span><span class="tip">Relief &amp; terrain</span></button>
     <button class="rbtn" data-act="theme"><span data-ico="layers"></span><span class="tip">Map style</span></button>
     <button class="rbtn" data-act="sound" aria-pressed="false"><span class="snd-ico"></span><span class="tip" id="soundTip">Sound</span></button>
@@ -73,6 +65,8 @@
 
   <!-- theme popover -->
   <div class="pop paper" id="themePop" role="dialog" aria-label="Map style">
+    <h4>Map view</h4>
+    <div class="vseg" role="group" aria-label="Map view"><button type="button" data-view="3d" aria-pressed="true"><b>3D</b><span>Tilted globe with relief</span></button><button type="button" data-view="2d" aria-pressed="false"><b>2D</b><span>Flat map, north up</span></button></div>
     <h4>Map style</h4>
     <button class="theme-opt" data-theme="pothi"><span class="sw sw-pothi"></span><span><b>Pothi <span class="deva">पोथी</span></b><span>Parchment atlas, engraved relief</span></span></button>
     <button class="theme-opt" data-theme="akash"><span class="sw sw-akash"></span><span><b>Akash <span class="deva">आकाश</span></b><span>Satellite imagery from above</span></span></button>
@@ -177,6 +171,7 @@
       <div class="keys">
         <span><kbd>/</kbd> search</span><span><kbd>←</kbd> <kbd>→</kbd> previous / next water body</span><span><kbd>1</kbd>–<kbd>4</kbd> open a layer</span><span><kbd>Esc</kbd> close</span><span><kbd>Ctrl</kbd> + drag · tilt &amp; rotate</span>
       </div>
+      <p class="help-more"><a href="user-manual.html" target="_blank" rel="noopener">Read the full User Manual, with pictures of every feature</a></p>
     </div>
   </div>
 

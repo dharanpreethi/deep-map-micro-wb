@@ -8,8 +8,8 @@
      tank    – temple bells, echoing stepwell drips, shankh, deep drone
      canal   – flowing water, ektara with gopiyantra bends, soft dhol
      channel – babbling river, koel calls, wind, bansuri in Raag Malkauns
-   Browsers only allow sound after the visitor's first tap or key press,
-   so the soundscape starts on that first interaction.
+   Sound is OFF by default. It plays only after the visitor switches it
+   on with a speaker button, and stays on for the rest of that visit.
    ===================================================================== */
 (function () {
   'use strict';
@@ -25,11 +25,14 @@
   const VOLUME = 1.5;
   const SA = 146.83; // tonic: D3
 
+  // Sound starts OFF on every visit. Once a visitor switches it on, it stays on
+  // for the rest of that visit (this browser tab), page after page.
   const store = {
-    get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : v; } catch (e) { return d; } },
-    set(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* storage unavailable */ } }
+    get(k, d) { try { const v = sessionStorage.getItem(k); return v == null ? d : v; } catch (e) { return d; } },
+    set(k, v) { try { sessionStorage.setItem(k, v); } catch (e) { /* storage unavailable */ } }
   };
-  let on = store.get('dm-sound', '1') === '1';
+  try { localStorage.removeItem('dm-sound'); } catch (e) { /* old setting, no longer used */ }
+  let on = store.get('dm-sound-on', '0') === '1';
   let ctx = null, master = null, reverb = null, noiseBuf = null;
   let current = null, currentKey = null, wantKey = 'theme', running = false;
   const listeners = [];
@@ -361,7 +364,7 @@
     sceneForType(type) { return TYPE_SCENE[type] || 'theme'; },
     toggle(force) {
       on = force != null ? !!force : !on;
-      store.set('dm-sound', on ? '1' : '0');
+      store.set('dm-sound-on', on ? '1' : '0');
       if (on) { unlock(); }
       else if (ctx) {
         master.gain.cancelScheduledValues(ctx.currentTime);

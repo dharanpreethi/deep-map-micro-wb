@@ -21,7 +21,6 @@
   // fill every [data-ico] slot with its line icon
   const paintIcons = (root = document) => root.querySelectorAll('[data-ico]').forEach(n => { n.outerHTML = I.ui(n.dataset.ico); });
   paintIcons();
-  $('#logoSlot').innerHTML = I.logo();
   $('#veilLogo').innerHTML = I.logo();
   $('#roseSvg').innerHTML = I.compassRose();
 
@@ -138,7 +137,11 @@
   const LOCAL = !!window.DM_LOCAL;
   let theme = store.get('dm-theme', document.documentElement.dataset.ui === 'dark' ? 'raat' : 'pothi');
   if (!PAL[theme] || (LOCAL && theme === 'akash')) theme = 'pothi';
-  let terrainOn = !LOCAL && store.get('dm-terrain', innerWidth <= 760 ? '0' : '1') === '1';
+  // The map always opens in 3D, with relief switched on. Visitors can change to 2D
+  // (or switch the relief off) at any time; ?view=2d opens straight into the flat map.
+  let view3d = !/^2d$/i.test(new URLSearchParams(location.search).get('view') || '');
+  let terrainOn = !LOCAL;
+  const B = b => view3d ? b : 0; // bearings only turn in 3D; 2D stays north up
   let exag = parseFloat(store.get('dm-exag', '1.6')) || 1.6;
 
   function wbGeoJSON(list) {
@@ -226,7 +229,7 @@
     }
     style.projection = { type: 'globe' };
     style.sky = Object.assign({ 'sky-horizon-blend': .55, 'horizon-fog-blend': .6, 'fog-ground-blend': .75, 'atmosphere-blend': ['interpolate', ['linear'], ['zoom'], 0, 1, 5, 1, 8, 0] }, P.sky);
-    if (terrainOn && withTerrain) style.terrain = { source: 'dm-dem', exaggeration: exag };
+    if (terrainOn && view3d && withTerrain) style.terrain = { source: 'dm-dem', exaggeration: exag };
     return style;
   }
 
@@ -236,7 +239,7 @@
   document.documentElement.dataset.ui = theme === 'raat' ? 'dark' : 'light';
   const map = new maplibregl.Map({
     container: 'map', style: composeStyle(), center: [72, 16], zoom: 1.25, pitch: 0, bearing: 0,
-    maxPitch: 78, attributionControl: false, minZoom: 1, maxZoom: 18.5, dragRotate: true, touchPitch: true
+    maxPitch: view3d ? 78 : 0, attributionControl: false, minZoom: 1, maxZoom: 18.5, dragRotate: true, touchPitch: true
   });
   map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');
   map.addControl(new maplibregl.ScaleControl({ maxWidth: 110, unit: 'metric' }), 'bottom-right');
@@ -259,8 +262,7 @@
   const roseEl = $('#roseSvg svg');
   function updateRose() {
     roseEl.style.transform = `rotate(${-map.getBearing()}deg)`;
-    $('#pitchLbl').textContent = Math.round(map.getPitch()) + '° tilt';
-    $('[data-act="tilt"]').setAttribute('aria-pressed', map.getPitch() > 8 ? 'true' : 'false');
+    $('#pitchLbl').textContent = view3d ? Math.round(map.getPitch()) + '° tilt' : '2D · north up';
   }
   map.on('rotate', updateRose); map.on('pitch', updateRose);
   $('#rose').addEventListener('click', () => map.easeTo({ bearing: 0, duration: 900 }));
@@ -446,7 +448,7 @@
     if (!isMobile() && opts.list !== false) openSuchi();
     const b = BBOX[name];
     if (b) {
-      const cam = { padding: pad(), pitch: 55, bearing: -14, duration: REDUCED ? 0 : 2800, maxZoom: 9.2, essential: true };
+      const cam = { padding: pad(), pitch: 55, bearing: B(-14), duration: REDUCED ? 0 : 2800, maxZoom: 9.2, essential: true };
       map.fitBounds([[b[0], b[1]], [b[2], b[3]]], cam);
     }
     setURL({ state: name });
@@ -462,7 +464,7 @@
   function overview(duration = 2600) {
     const cam = map.cameraForBounds(INDIA_BOUNDS, { padding: isMobile() ? { top: 90, bottom: 80, left: 10, right: 10 } : { top: 70, bottom: 40, left: 220, right: 120 } });
     const z = cam ? cam.zoom - .05 : 4;
-    map.flyTo({ center: [82.4, 21.6], zoom: z, pitch: 42, bearing: -8, duration: REDUCED ? 0 : duration, essential: true, curve: 1.4 });
+    map.flyTo({ center: [82.4, 21.6], zoom: z, pitch: 42, bearing: B(-8), duration: REDUCED ? 0 : duration, essential: true, curve: 1.4 });
   }
   $('#stateBack').addEventListener('click', exitState);
 
@@ -523,7 +525,7 @@
   }
   function flyTo(r, opts = {}) {
     const z = { lake: 12.6, pond: 15, tank: 15.4, canal: 12.4, channel: 12, dam: 13 }[r.typeKey] || 13;
-    map.flyTo({ center: [r.dlon, r.dlat], zoom: opts.zoom || z, pitch: opts.pitch || 60, bearing: opts.bearing != null ? opts.bearing : map.getBearing() + 18, padding: pad(), duration: REDUCED ? 0 : (opts.duration || 3200), curve: 1.5, essential: true });
+    map.flyTo({ center: [r.dlon, r.dlat], zoom: opts.zoom || z, pitch: opts.pitch || 60, bearing: B(opts.bearing != null ? opts.bearing : map.getBearing() + 18), padding: pad(), duration: REDUCED ? 0 : (opts.duration || 3200), curve: 1.5, essential: true });
   }
   function showLayer(k, silent) {
     curLayer = k;
@@ -666,7 +668,7 @@
     map.once('moveend', () => {
       if (!TOUR.playing || TOUR.list[TOUR.i] !== r) return;
       bar.style.setProperty('--dur', TOUR.dwell + 'ms'); bar.className = 'run';
-      if (!REDUCED) map.easeTo({ bearing: map.getBearing() + 28, duration: TOUR.dwell, easing: t => t, essential: true });
+      if (!REDUCED && view3d) map.easeTo({ bearing: map.getBearing() + 28, duration: TOUR.dwell, easing: t => t, essential: true });
       TOUR.timer = setTimeout(() => { TOUR.i = (TOUR.i + 1) % TOUR.list.length; tourGo(); }, TOUR.dwell);
     });
     setPlayIcon();
@@ -705,16 +707,16 @@
     // MapLibre cannot swap a globe style while terrain is live, so lift terrain first and restore it after
     try { map.setTerrain(null); } catch (e) { /* no terrain yet */ }
     map.setStyle(composeStyle(false), { diff: false });
-    map.once('style.load', () => { if (terrainOn) { try { map.setTerrain({ source: 'dm-dem', exaggeration: exag }); } catch (e) { console.warn(e); } } });
+    map.once('style.load', () => { if (terrainOn && view3d) { try { map.setTerrain({ source: 'dm-dem', exaggeration: exag }); } catch (e) { console.warn(e); } } });
     $$('.theme-opt').forEach(b => b.setAttribute('aria-pressed', b.dataset.theme === t ? 'true' : 'false'));
     if (cur) setHero(cur);
   }
   function setTerrain(on) {
-    terrainOn = on; store.set('dm-terrain', on ? '1' : '0');
+    terrainOn = on;
     $('#terrainSwitch').setAttribute('aria-checked', String(on));
     $('[data-act="terrain"]').setAttribute('aria-pressed', String(on));
     if (!styleReady) return;
-    try { map.setTerrain(on ? { source: 'dm-dem', exaggeration: exag } : null); } catch (e) { console.warn(e); }
+    try { map.setTerrain(on && view3d ? { source: 'dm-dem', exaggeration: exag } : null); } catch (e) { console.warn(e); }
     if (map.getLayer('dm-hillshade')) map.setLayoutProperty('dm-hillshade', 'visibility', on ? 'visible' : 'none');
   }
   $$('.theme-opt').forEach(b => { b.setAttribute('aria-pressed', b.dataset.theme === theme ? 'true' : 'false'); b.addEventListener('click', () => setTheme(b.dataset.theme)); });
@@ -722,9 +724,36 @@
   $('#exag').value = exag; $('#exagV').textContent = exag.toFixed(1) + '×';
   $('#exag').addEventListener('input', e => {
     exag = parseFloat(e.target.value); store.set('dm-exag', String(exag)); $('#exagV').textContent = exag.toFixed(1) + '×';
-    if (terrainOn && styleReady) map.setTerrain({ source: 'dm-dem', exaggeration: exag });
+    if (terrainOn && view3d && styleReady) map.setTerrain({ source: 'dm-dem', exaggeration: exag });
   });
   setTerrain(terrainOn);
+
+  /* ---------- 3D / 2D view ---------- */
+  function setView(is3d, quiet) {
+    view3d = !!is3d;
+    document.body.classList.toggle('view-2d', !view3d);
+    const btn = $('[data-act="view"]');
+    $('#viewTxt').textContent = view3d ? '3D' : '2D';
+    $('#viewTip').textContent = view3d ? '3D view · switch to 2D' : '2D view · switch to 3D';
+    btn.setAttribute('aria-pressed', String(view3d));
+    btn.setAttribute('aria-label', view3d ? 'Map view: 3D. Switch to the 2D map' : 'Map view: 2D. Switch to the 3D map');
+    $$('[data-view]').forEach(b => b.setAttribute('aria-pressed', String((b.dataset.view === '3d') === view3d)));
+    if (view3d) {
+      map.setMaxPitch(78);
+      map.dragRotate.enable(); map.touchZoomRotate.enableRotation(); map.touchPitch.enable();
+      if (styleReady && terrainOn) { try { map.setTerrain({ source: 'dm-dem', exaggeration: exag }); } catch (e) { console.warn(e); } }
+      if (!quiet) map.easeTo({ pitch: activeState || cur ? 58 : 45, bearing: map.getBearing() || -10, duration: REDUCED ? 0 : 1100 });
+    } else {
+      try { map.setTerrain(null); } catch (e) { /* no terrain yet */ }
+      map.dragRotate.disable(); map.touchZoomRotate.disableRotation(); map.touchPitch.disable();
+      if (quiet) { map.setMaxPitch(0); map.setBearing(0); }
+      else map.easeTo({ pitch: 0, bearing: 0, duration: REDUCED ? 0 : 900 }).once('moveend', () => { if (!view3d) map.setMaxPitch(0); });
+    }
+    updateRose();
+    if (!quiet) toast(view3d ? '3D view: tilted globe with relief' : '2D view: flat map, north up');
+  }
+  $$('[data-view]').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); setView(b.dataset.view === '3d'); }));
+  setView(view3d, true);
   window.addEventListener('dm:prefs', e => {
     if (e.detail.key !== 'ui') return;
     if (e.detail.ui === 'dark' && theme !== 'raat') setTheme('raat');
@@ -747,7 +776,8 @@
     ['<div style="width:34px">' + I.kalash() + '</div>', 'Enter a state', 'Click a kalash pin or a raised state to fly into it.'],
     [I.typeMarker('tank', { historical: 'complete', cultural: 'complete', literary: 'sources', environmental: 'pending' }), 'Open a water body', 'Click a medallion; numbered clusters open as you zoom.'],
     [I.fishBadge('literary'), 'Read the four layers', 'Four fish narrators tell the historical, cultural, literary and environmental memory.'],
-    [I.ui('tilt'), 'Tilt & rotate in 3D', 'Right-drag or Ctrl + drag; two fingers on touch screens.'],
+    [I.ui('tilt'), 'Switch between 3D and 2D', 'The map opens in 3D. Press the 3D button on the right for a flat 2D map, and press it again to return.'],
+    [I.ui('globe'), 'Tilt and rotate', 'In 3D, right-drag or Ctrl + drag. On a touch screen, use two fingers.'],
     [I.ui('tour'), 'Take the guided tour', 'A guided flight from one water body to the next.'],
     [I.ui('list'), 'Search & filter', 'Find by name, state or water form in the Jal Suchi.']
   ].map(([ic, b, t]) => `<div><span class="ic">${ic}</span><span><b>${b}</b>${t}</span></div>`).join('');
@@ -780,8 +810,8 @@
     menu: () => window.DM_SITE && DM_SITE.openMenu(),
     zin: () => map.zoomIn({ duration: 500 }),
     zout: () => map.zoomOut({ duration: 500 }),
-    tilt: () => map.easeTo({ pitch: map.getPitch() > 8 ? 0 : 55, duration: 900 }),
-    terrain: () => setTerrain(!terrainOn),
+    view: () => setView(!view3d),
+    terrain: () => { if (!view3d) { setTerrain(true); setView(true); return; } setTerrain(!terrainOn); },
     theme: () => togglePop(),
     sound: () => { if (SND) { const on = SND.toggle(); toast(on ? 'Sound on — ' + SND.state().desc : 'Sound off'); } },
     full: () => { if (!document.fullscreenElement) document.documentElement.requestFullscreen && document.documentElement.requestFullscreen(); else document.exitFullscreen(); }

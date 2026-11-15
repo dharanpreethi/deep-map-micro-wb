@@ -1,4 +1,4 @@
-/* Home page: mandala of the four layers, floating diyas, live numbers, case studies. */
+/* Home page: mandala of the four layers, floating diyas, live numbers, team strip. */
 (function () {
   'use strict';
   const I = window.DM_ICONS, R = window.DM_RECORDS || [], $ = s => document.querySelector(s);
@@ -63,18 +63,6 @@
     const run = () => st.querySelectorAll('b').forEach(b => { const n = +b.dataset.n, t0 = performance.now(); (function tk(t) { const k = Math.min(1, (t - t0) / 1600); b.textContent = Math.round(n * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(tk); })(t0); });
     if ('IntersectionObserver' in window) { const io = new IntersectionObserver(e => { if (e[0].isIntersecting) { run(); io.disconnect(); } }); io.observe(st); } else run();
   }
-
-  // case studies from the paper
-  const CASES = [
-    { id: '20', place: 'Kolkata · West Bengal', title: 'Adi Ganga', text: 'The old course of the Ganga, remembered in the Mangal Kavyas and still a site of ritual bathing near Kalighat — now carrying sewage under the metro line.' },
-    { id: '44', place: 'Junagadh · Gujarat', title: 'Damodar Kund', text: 'A sacred kund at the foot of Girnar, tied to Krishna, the Skanda Purana and the poet-saint Narsinh Mehta. The devotion that sustains it also pollutes it.' },
-    { id: '65', place: 'Erode · Tamil Nadu', title: 'Kalingarayan Canal', text: 'A thirteenth-century river link built by a Kongu chieftain, sung about in local songs — and today a carrier of textile effluents.' }
-  ];
-  const cs = $('#cases');
-  if (cs) cs.innerHTML = CASES.map(c => {
-    const r = R.find(x => x.id === c.id) || {}, img = r.photo ? `<img src="${r.photo}" alt="${esc(c.title)}" loading="lazy" decoding="async">` : I.hero(r.type || 'canal', +c.id, false);
-    return `<a class="card case lift rv" href="map.html?wb=${c.id}"><div class="ph">${img}</div><div class="bd"><span class="meta">${c.place}</span><h3>${c.title}</h3><p>${c.text}</p><span class="go">Open in the deep map ${I.ui('next')}</span></div></a>`;
-  }).join('');
 
   // team strip
   const ts = $('#teamStrip'), T = (window.DM_SITE || {}).TEAM || [];
